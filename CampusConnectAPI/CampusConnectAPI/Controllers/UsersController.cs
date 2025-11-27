@@ -1,43 +1,63 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using CampusConnectAPI.DB;
+using CampusConnectAPI.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace CampusConnectAPI.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
-        //Where I will get username and password
+        private readonly AppDbContext _context;
 
-        // GET: api/Users
-        [HttpGet]
-        public IEnumerable<string> Get()
+        public UsersController(AppDbContext context)
         {
-            return new string[] { "value1", "value2" };
+            _context = context;
         }
 
-        // GET api/Users/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        // Register a new user
+        [HttpPost("register")]
+        public async Task<ActionResult<Login>> Register([FromBody] Login login)
         {
-            return $"value {id}";
+            // Check if email already exists
+            if (await _context.Logins.AnyAsync(l => l.Email == login.Email))
+                return BadRequest("Email already registered");
+
+            _context.Logins.Add(login);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetLogin), new { email = login.Email }, login);
         }
 
-        // POST api/Users
-        [HttpPost]
-        public void Post([FromBody] string value)
+        // Validate login credentials
+        [HttpPost("validate")]
+        public async Task<ActionResult<bool>> Validate([FromBody] Login loginDto)
         {
+            var login = await _context.Logins
+                .Include(l => l.Profile)
+                .FirstOrDefaultAsync(l => l.Email == loginDto.Email);
+
+            if (login == null) return NotFound(false);
+
+            // NOTE: plain text password for prototype
+            if (login.Password == loginDto.Password)
+                return true;
+
+            return false;
         }
 
-        // PUT api/Users/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        // Get login info by email
+        [HttpGet("{email}")]
+        public async Task<ActionResult<Login>> GetLogin(string email)
         {
-        }
+            var login = await _context.Logins
+                .Include(l => l.Profile)
+                .FirstOrDefaultAsync(l => l.Email == email);
 
-        // DELETE api/Users5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+            if (login == null) return NotFound();
+
+            return login;
         }
     }
 }

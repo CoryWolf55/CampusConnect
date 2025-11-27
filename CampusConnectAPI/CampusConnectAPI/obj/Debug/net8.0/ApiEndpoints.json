@@ -1,15 +1,21 @@
 [
   {
     "ContainingType": "CampusConnectAPI.Controllers.UsersController",
-    "Method": "Get",
-    "RelativePath": "api/Users",
+    "Method": "GetLogin",
+    "RelativePath": "api/Users/{email}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [],
+    "Parameters": [
+      {
+        "Name": "email",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
     "ReturnTypes": [
       {
-        "Type": "System.Collections.Generic.IEnumerable\u00601[[System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "Type": "CampusConnectAPI.Models.Login",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -21,43 +27,21 @@
   },
   {
     "ContainingType": "CampusConnectAPI.Controllers.UsersController",
-    "Method": "Post",
-    "RelativePath": "api/Users",
+    "Method": "Register",
+    "RelativePath": "api/Users/register",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "value",
-        "Type": "System.String",
+        "Name": "login",
+        "Type": "CampusConnectAPI.Models.Login",
         "IsRequired": true
       }
     ],
     "ReturnTypes": [
       {
-        "Type": "System.Void",
-        "MediaTypes": [],
-        "StatusCode": 200
-      }
-    ]
-  },
-  {
-    "ContainingType": "CampusConnectAPI.Controllers.UsersController",
-    "Method": "Get",
-    "RelativePath": "api/Users/{id}",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Int32",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": [
-      {
-        "Type": "System.String",
+        "Type": "CampusConnectAPI.Models.Login",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -69,49 +53,26 @@
   },
   {
     "ContainingType": "CampusConnectAPI.Controllers.UsersController",
-    "Method": "Put",
-    "RelativePath": "api/Users/{id}",
-    "HttpMethod": "PUT",
+    "Method": "Validate",
+    "RelativePath": "api/Users/validate",
+    "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "id",
-        "Type": "System.Int32",
-        "IsRequired": true
-      },
-      {
-        "Name": "value",
-        "Type": "System.String",
+        "Name": "loginDto",
+        "Type": "CampusConnectAPI.Models.Login",
         "IsRequired": true
       }
     ],
     "ReturnTypes": [
       {
-        "Type": "System.Void",
-        "MediaTypes": [],
-        "StatusCode": 200
-      }
-    ]
-  },
-  {
-    "ContainingType": "CampusConnectAPI.Controllers.UsersController",
-    "Method": "Delete",
-    "RelativePath": "api/Users/{id}",
-    "HttpMethod": "DELETE",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Int32",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": [
-      {
-        "Type": "System.Void",
-        "MediaTypes": [],
+        "Type": "System.Boolean",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
         "StatusCode": 200
       }
     ]

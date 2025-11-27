@@ -1,18 +1,22 @@
-﻿namespace CampusConnectAPI.Models
-{
-    public class Profile
-    {
-        public int Id { get; set; }
-        public string Username { get; set; }
-        public string Major { get; set; }
-        public int Year { get; set; }
-        public string Description { get; set; }
+﻿using System;
+using System.Collections.Generic;
 
-        public Login Login { get; set; }                      // navigation back to Login
-        public ICollection<ProfileCourse> ProfileCourses { get; set; }
-        public ICollection<ProfileClub> ProfileClubs { get; set; }
-        public ICollection<Thread> Threads { get; set; }      // threads created
-        public ICollection<Post> Posts { get; set; }          // posts created
-        public ICollection<Reputation> Reputations { get; set; }
-    }
+namespace CampusConnectAPI.Models;
+
+public partial class Profile
+{
+    public int Id { get; set; }
+    public string Username { get; set; } = null!;
+    public string? Major { get; set; }
+    public int? Year { get; set; }
+    public string? Description { get; set; }
+
+    public virtual Login? Login { get; set; }
+    public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
+    public virtual ICollection<ForumThread> ForumThreads { get; set; } = new List<ForumThread>();
+    public virtual ICollection<Reputation> Reputations { get; set; } = new List<Reputation>();
+
+    // Fixed: Use join entities for many-to-many
+    public virtual ICollection<ProfileClub> ProfileClubs { get; set; } = new List<ProfileClub>();
+    public virtual ICollection<ProfileCourse> ProfileCourses { get; set; } = new List<ProfileCourse>();
 }
