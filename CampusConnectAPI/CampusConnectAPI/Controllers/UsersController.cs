@@ -2,6 +2,7 @@
 using CampusConnectAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace CampusConnectAPI.Controllers
 {
@@ -10,10 +11,12 @@ namespace CampusConnectAPI.Controllers
     public class UsersController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly PasswordHasher<Login> _hasher;
 
         public UsersController(AppDbContext context)
         {
             _context = context;
+            _hasher = new PasswordHasher<Login>();
         }
 
         // Register a new user
@@ -23,6 +26,10 @@ namespace CampusConnectAPI.Controllers
             // Check if email already exists
             if (await _context.Logins.AnyAsync(l => l.Email == login.Email))
                 return BadRequest("Email already registered");
+
+            // Hash the password BEFORE saving
+            string plainPassword = login.PasswordHash;
+            login.PasswordHash = _hasher.HashPassword(login, plainPassword);
 
             _context.Logins.Add(login);
             await _context.SaveChangesAsync();
@@ -38,10 +45,13 @@ namespace CampusConnectAPI.Controllers
                 .Include(l => l.Profile)
                 .FirstOrDefaultAsync(l => l.Email == loginDto.Email);
 
-            if (login == null) return NotFound(false);
+            if (login == null)
+                return NotFound(false);
 
-            // NOTE: plain text password for prototype
-            if (login.Password == loginDto.Password)
+            // Compare hashed password
+            var result = _hasher.VerifyHashedPassword(login, login.PasswordHash, loginDto.PasswordHash);
+
+            if (result == PasswordVerificationResult.Success)
                 return true;
 
             return false;
@@ -55,7 +65,8 @@ namespace CampusConnectAPI.Controllers
                 .Include(l => l.Profile)
                 .FirstOrDefaultAsync(l => l.Email == email);
 
-            if (login == null) return NotFound();
+            if (login == null)
+                return NotFound();
 
             return login;
         }

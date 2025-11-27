@@ -1,5 +1,6 @@
 using System;
 using CampusConnectAPI.DB;
+using CampusConnectAPI.Backend.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +17,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+RateLimiting.ConfigureRateLimiting(builder.Services);
 
 var app = builder.Build();
 
