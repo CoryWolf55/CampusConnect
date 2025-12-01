@@ -7,7 +7,7 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  
+  //check if user Id has a profile username set, go to dashboard, otherwise create an account
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -20,13 +20,25 @@ function LoginPage() {
         }
       );
 
-      if (response.data === true) {
-        localStorage.setItem("userEmail", email);
-        navigate("/dashboard");
-      } else {
-        alert("Invalid credentials");
-        //No Account found
+      // Backend returns { id, email }
+      if(response === null) return;
+      const user = response.data;
+
+      // Save login ID and email in localStorage
+      localStorage.setItem("userId", user.id);
+      localStorage.setItem("userEmail", user.email);
+      //check if 
+      const profileCreated = await axios.get("http://localhost:5000/api/users/profile/${user.id}");
+      if(profileCreated === false)
+      {
+        //No username therefore no profile
+        navigate("/profilecreate");
       }
+      else{
+        //There is an account
+        navigate("/dashboard");
+      }
+      
     } catch (error) {
       console.error("Login error:", error);
       alert("Login failed. Check the console.");

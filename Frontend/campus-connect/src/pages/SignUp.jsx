@@ -19,8 +19,7 @@ function SignUp() {
       );
 
       if (response.data === true) {
-        localStorage.setItem("userEmail", email);
-        navigate("/profilecreate");
+        navigate("/");
       } else {
         alert("Invalid credentials");
         //No Account found
@@ -53,7 +52,7 @@ function SignUp() {
             required
           />
         </div>
-        <button type="submit">Login</button>
+        <button type="submit">Sign In</button>
       </form>
     </div>
   );

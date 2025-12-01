@@ -27,6 +27,14 @@ function ProfileCreationPage() {
             courses: courses
         }
       );
+       if (response.status >= 200 && response.status < 300) {
+      // Success
+      alert("Profile updated successfully!");
+      console.log("Updated profile:", response.data);
+      } else {
+      // Something went wrong
+      alert("Failed to update profile. Try again.");
+    }
 
     } catch (error) {
       console.error("Error:", error);
@@ -77,6 +85,24 @@ function ProfileCreationPage() {
           type="text"
           value={major}
           onChange={(e) => setMajor(e.target.value)}
+        />
+      </div>
+
+      <div>
+        <label>Clubs:</label>
+        <input
+          type="text"
+          value={clubs}
+          onChange={(e) => setClubs(e.target.value)}
+        />
+      </div>
+
+      <div>
+        <label>Courses:</label>
+        <input
+          type="text"
+          value={courses}
+          onChange={(e) => setCourses(e.target.value)}
         />
       </div>
       

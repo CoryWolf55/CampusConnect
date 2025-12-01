@@ -34,6 +34,24 @@ namespace CampusConnectAPI.Controllers
             _context.Logins.Add(login);
             await _context.SaveChangesAsync();
 
+            // Create an empty profile linked to this login
+            var profile = new Profile
+            {
+                Username = "",          
+                Major = null,
+                Year = null,
+                Description = null,
+                Login = login           // link profile to newly created login
+            };
+
+            _context.Profiles.Add(profile);
+            await _context.SaveChangesAsync();
+
+            // Optionally set the reverse navigation property
+            login.Profile = profile;
+            login.ProfileId = profile.Id;
+            await _context.SaveChangesAsync();
+
             return CreatedAtAction(nameof(GetLogin), new { email = login.Email }, login);
         }
 
@@ -52,7 +70,7 @@ namespace CampusConnectAPI.Controllers
             var result = _hasher.VerifyHashedPassword(login, login.PasswordHash, loginDto.PasswordHash);
 
             if (result == PasswordVerificationResult.Success)
-                return true;
+                return Ok(new { id = login.Id, email = login.Email });  // return ID and email
 
             return false;
         }
@@ -71,10 +89,44 @@ namespace CampusConnectAPI.Controllers
             return login;
         }
 
-        [HttpPost("profile")]
-        public async Task<ActionResult<Login>> Profile([FromBody] Profile profile)
+        [HttpGet("profile/{id}")]
+        public async Task<ActionResult<bool>> GetProfile(int id)
         {
-            
+            var profile = await _context.Profiles
+                .Include(p => p.Login)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (profile == null)
+                return NotFound();
+
+            if (profile.Username == null || profile.Username == "")
+                return false;
+
+            return true;
+        }
+
+        [HttpPost("profile")]
+        public async Task<ActionResult<Profile>> Profile([FromBody] Profile request)
+        {
+            // Find the profile using the linked login
+            var profile = await _context.Profiles
+                .Include(p => p.Login)                 // include the login navigation
+                .FirstOrDefaultAsync(p => p.Login!.Id == request.Login!.Id);
+
+            if (profile == null)
+                return NotFound("Profile not found");
+
+            // Update profile fields
+            profile.Username = request.Username;
+            profile.Major = request.Major;
+            profile.Year = request.Year;
+            profile.Description = request.Description;
+            profile.ProfileClubs = request.ProfileClubs;
+            profile.ProfileCourses = request.ProfileCourses;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(profile);
         }
     }
 }
