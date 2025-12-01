@@ -1,20 +1,22 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import '../styles/LoginSignup.css'; // reuse the same CSS
 
 function SignUp() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-    const saveLogin = async (e) => {
+  const saveLogin = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await axios.post("http://localhost:5000/api/users/register",
+      const response = await axios.post(
+        "http://localhost:5000/api/users/register",
         {
           email: email,
-          passwordHash: password
+          passwordHash: password,
         }
       );
 
@@ -22,7 +24,6 @@ function SignUp() {
         navigate("/");
       } else {
         alert("Invalid credentials");
-        //No Account found
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -31,29 +32,39 @@ function SignUp() {
   };
 
   return (
-    <div style={{ maxWidth: "400px", margin: "50px auto" }}>
-      <h2>SignUp</h2>
-      <form onSubmit={saveLogin}>
-        <div>
-          <label>Email:</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
+    <div className="page">
+      <div className="container">
+        <div className="header">
+          <div className="text">Sign Up</div>
         </div>
-        <div>
-          <label>Password:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit">Sign In</button>
-      </form>
+
+        <form onSubmit={saveLogin}>
+  <div className="input">
+    <label>Email:</label>
+    <input
+      type="email"
+      value={email}
+      onChange={(e) => setEmail(e.target.value)}
+      required
+    />
+  </div>
+
+  <div className="input">
+    <label>Password:</label>
+    <input
+      type="password"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      required
+    />
+  </div>
+
+  <div className="button-row">
+    <button type="submit">Sign Up</button>
+    <button type="button" onClick={() => navigate("/")}>Login</button>
+  </div>
+</form>
+      </div>
     </div>
   );
 }
