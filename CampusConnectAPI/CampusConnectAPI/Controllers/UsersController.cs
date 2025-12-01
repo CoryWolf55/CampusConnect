@@ -70,5 +70,11 @@ namespace CampusConnectAPI.Controllers
 
             return login;
         }
+
+        [HttpPost("profile")]
+        public async Task<ActionResult<Login>> Profile([FromBody] Profile profile)
+        {
+            
+        }
     }
 }
