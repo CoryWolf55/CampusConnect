@@ -6,7 +6,7 @@ function DashboardPage() {
   const navigate = useNavigate();
 
   const handleProfileClick = () => {
-    navigate("/profile");
+    navigate("/profilepage");
   };
 
   return (
@@ -21,11 +21,11 @@ function DashboardPage() {
 
       {/* Navigation Bar */}
       <nav className="navbar">
-        <ul>
-          <li>Forums</li>
-          <li>Notifications</li>
-          <li>Settings</li>
-        </ul>
+      <ul>
+        <li onClick={() => navigate("/forums")}>Forums</li>
+        <li onClick={() => navigate("/notifications")}>Notifications</li>
+        <li onClick={() => navigate("/settings")}>Settings</li>
+      </ul>
       </nav>
 
       {/* Dashboard Content */}

@@ -1,0 +1,107 @@
+/* Full-page wrapper */
+.profile-page-wrapper {
+  width: 100vw;
+  min-height: 100vh;
+  background: linear-gradient(#151515, #0d0d0d);
+  color: #ddd;
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* --------------------- */
+/* Header Banner */
+/* --------------------- */
+.profile-header {
+  width: 100%;
+  height: 80px;
+  background: #1d1d1d;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+
+.logo {
+  font-size: 28px;
+  color: #b478ff; /* violet tint */
+  font-weight: 700;
+}
+
+.profile-header-btn {
+  background: #3c009d;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.2s;
+  width: 200px;
+}
+
+.profile-header-btn:hover {
+  background: #2a006f;
+}
+
+
+/* --------------------- */
+/* Content Layout */
+/* --------------------- */
+.profile-content {
+  display: flex;
+  gap: 60px;
+  padding: 40px 60px;
+  flex: 1;
+}
+
+/* Left profile sidebar */
+.profile-left {
+  width: 280px;
+  text-align: center;
+}
+
+.profile-avatar {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  border: 3px solid #3c009d;
+  margin-bottom: 20px;
+}
+
+.profile-username {
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: white;
+}
+
+.profile-major,
+.profile-year {
+  font-size: 16px;
+  color: #b0b0b0;
+  margin: 4px 0;
+}
+
+
+/* Right column */
+.profile-right {
+  flex: 1;
+  background: #1a1a1a;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.profile-right h3 {
+  color: #b478ff;
+  margin-top: 20px;
+  margin-bottom: 8px;
+}
+
+.profile-description {
+  color: #ccc;
+  line-height: 1.5;
+  margin-bottom: 15px;
+}

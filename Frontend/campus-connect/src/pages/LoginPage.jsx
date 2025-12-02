@@ -26,9 +26,9 @@ function LoginPage() {
       localStorage.setItem("userId", user.id);
       localStorage.setItem("userEmail", user.email);
 
-      // FIXED template literal
+      
       const profileCreated = await axios.get(
-        `http://localhost:5000/api/users/profile/${user.id}`
+        `http://localhost:5000/api/users/profile/find/${user.id}`
       );
 
       if (profileCreated === false) {

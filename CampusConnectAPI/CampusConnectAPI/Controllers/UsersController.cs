@@ -89,8 +89,8 @@ namespace CampusConnectAPI.Controllers
             return login;
         }
 
-        [HttpGet("profile/{id}")]
-        public async Task<ActionResult<bool>> GetProfile(int id)
+        [HttpGet("profile/find/{id}")]
+        public async Task<ActionResult<bool>> ProfileFound(int id)
         {
             var profile = await _context.Profiles
                 .Include(p => p.Login)
@@ -105,8 +105,24 @@ namespace CampusConnectAPI.Controllers
             return true;
         }
 
+        [HttpGet("profile/{id}")]
+        public async Task<ActionResult<bool>> GetProfile(int id)
+        {
+            var profile = await _context.Profiles
+                .Include(p => p.Login)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (profile == null)
+                return NotFound();
+
+            
+
+            return Ok(profile);
+        }
+
+
         [HttpPost("profile")]
-        public async Task<ActionResult<Profile>> Profile([FromBody] Profile request)
+        public async Task<ActionResult<Profile>> RegisterProfile([FromBody] Profile request)
         {
             // Find the profile using the linked login
             var profile = await _context.Profiles
@@ -128,5 +144,54 @@ namespace CampusConnectAPI.Controllers
 
             return Ok(profile);
         }
+
+
+        //Get all communities from the campus by email domain
+        [HttpGet("community")]
+        public async Task<ActionResult<IEnumerable<Community>>> GetCommunities([FromQuery] string emailDomain)
+        {
+            if (string.IsNullOrWhiteSpace(emailDomain))
+                return BadRequest("Email domain is required.");
+
+            // Find the campus by email domain and include its communities
+            var campus = await _context.Campuses
+                .Include(c => c.Communities)
+                .FirstOrDefaultAsync(c => c.EmailDomain == emailDomain);
+
+            if (campus == null)
+                return NotFound();
+
+            // Return only the communities list
+            return Ok(campus.Communities);
+        }
+
+
+
+        //Get campus by email domain if not create one
+        [HttpPost("campus")]
+        public async Task<ActionResult<Campus>> GetCampus([FromBody] string email)
+        {
+            string emailDomain = email.Split('@').Last();
+            var campus = await _context.Campuses
+                .FirstOrDefaultAsync(p => p.EmailDomain == emailDomain);
+
+            if (campus == null)
+            {
+               //create campus with email domain
+               campus = new Campus
+                 {
+                      Name = emailDomain.Split('.').First().ToUpper() + " Campus",
+                      EmailDomain = emailDomain
+                 };
+    
+                 _context.Campuses.Add(campus);
+                 await _context.SaveChangesAsync();
+
+            }
+
+
+            return Ok(campus);
+        }
+
+
     }
-}

@@ -3,7 +3,9 @@ import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage.jsx";
 import SignUp from "./pages/SignUp.jsx";
 import ProfileCreationPage from "./pages/ProfileCreationPage.jsx";
-import Profile from "./pages/Profile.jsx";
+import ProfilePage from "./pages/ProfilePage.jsx";
+import ForumsPage from "./pages/ForumsPage.jsx";
+import ForumThreadPage from "./pages/ForumThreadPage.jsx";
 
 function App() {
   return (
@@ -13,7 +15,9 @@ function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/profilecreate" element={<ProfileCreationPage />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/profilepage" element={<ProfilePage/>} />
+        <Route path="/forums" element={<ForumsPage/>} />
+        <Route path="/forums/:threadId" element={<ForumThreadPage />} />
       </Routes>
     </Router>
   );
