@@ -89,7 +89,7 @@ Dashboard: Access posts, threads, and other user profiles.
 
 Edit Profile: Update your information anytime.
 
-### Screenshots / Demo
+## Screenshots / Demo
 
 ### 🔹 Login Page
 ![Login Page](./screenshots/SignUpPage.png)
