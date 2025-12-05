@@ -105,3 +105,29 @@
   line-height: 1.5;
   margin-bottom: 15px;
 }
+
+
+
+.navbar {
+  width: 100%;
+  background: #111;
+  padding: 12px 0;
+}
+
+.navbar ul {
+  display: flex;
+  list-style: none;
+  justify-content: center;
+  gap: 40px;
+}
+
+.navbar li {
+  cursor: pointer;
+  color: #ccc;
+  font-size: 18px;
+  transition: 0.2s;
+}
+
+.navbar li:hover {
+  color: white;
+}

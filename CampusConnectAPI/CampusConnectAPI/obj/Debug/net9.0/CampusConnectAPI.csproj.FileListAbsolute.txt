@@ -121,3 +121,4 @@ C:\Users\Cory\source\repos\CoryWolf55\CampusConnect\CampusConnectAPI\CampusConne
 C:\Users\Cory\source\repos\CoryWolf55\CampusConnect\CampusConnectAPI\CampusConnectAPI\obj\Debug\net9.0\CampusConnectAPI.pdb
 C:\Users\Cory\source\repos\CoryWolf55\CampusConnect\CampusConnectAPI\CampusConnectAPI\obj\Debug\net9.0\CampusConnectAPI.genruntimeconfig.cache
 C:\Users\Cory\source\repos\CoryWolf55\CampusConnect\CampusConnectAPI\CampusConnectAPI\obj\Debug\net9.0\ref\CampusConnectAPI.dll
+C:\Users\Cory\source\repos\CoryWolf55\CampusConnect\CampusConnectAPI\CampusConnectAPI\obj\Debug\net9.0\staticwebassets.upToDateCheck.txt

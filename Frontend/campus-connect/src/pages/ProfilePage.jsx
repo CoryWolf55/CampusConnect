@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // <-- import navigate
+import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 import "../styles/Profile.css";
 
 function ProfilePage() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const userId = localStorage.getItem("userId");
-  const navigate = useNavigate(); // <-- initialize navigate
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Create mock data object
+    // Mock profile fallback
     const mockData = {
       Username: "Test User",
       Major: "Computer Science",
@@ -25,17 +26,16 @@ function ProfilePage() {
       return;
     }
 
-    // Example fetch if you had a real API
     const fetchProfile = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/profile/${userId}`, {
+        const res = await fetch(`${API_BASE_URL}/profile/${userId}`, {
           credentials: "include",
         });
         const data = await res.json();
-        setProfile(data || mockData); // fallback to mockData if API returns nothing
+        setProfile(data || mockData);
       } catch (err) {
         console.error("Error fetching profile:", err);
-        setProfile(mockData); // fallback to mockData on error
+        setProfile(mockData);
       } finally {
         setLoading(false);
       }
@@ -44,12 +44,15 @@ function ProfilePage() {
     fetchProfile();
   }, [userId]);
 
+  const handleNavClick = (path) => navigate(path);
+
   if (loading) return <div>Loading...</div>;
   if (!profile) return <div>Could not load profile</div>;
 
   return (
     <div className="profile-page-wrapper">
-      {/* Top Header Banner */}
+
+      {/* HEADER */}
       <header className="profile-header">
         <div className="logo">CampusConnect</div>
 
@@ -63,7 +66,17 @@ function ProfilePage() {
         </button>
       </header>
 
-      {/* Main Profile Content */}
+      {/* DASHBOARD NAVBAR (same as dashboard) */}
+      <nav className="navbar">
+        <ul>
+          <li onClick={() => handleNavClick("/dashboard")}>Dashboard</li>
+          <li onClick={() => handleNavClick("/forums")}>Forums</li>
+          <li onClick={() => handleNavClick("/notifications")}>Notifications</li>
+          <li onClick={() => handleNavClick("/settings")}>Settings</li>
+        </ul>
+      </nav>
+
+      {/* MAIN CONTENT */}
       <div className="profile-content">
         {/* Left column */}
         <div className="profile-left">
@@ -74,8 +87,8 @@ function ProfilePage() {
           />
 
           <h2 className="profile-username">{profile.Username}</h2>
-          <p className="profile-major">{profile.Major}</p>
-          <p className="profile-year">{profile.Year}</p>
+          <p className="profile-major">{profile.major}</p>
+          <p className="profile-year">{profile.year}</p>
         </div>
 
         {/* Right column */}

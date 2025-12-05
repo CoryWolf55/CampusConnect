@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 import axios from "axios";
 
 function ProfileCreationPage() {
@@ -42,7 +43,7 @@ function ProfileCreationPage() {
       }
 
       try {
-        const res = await axios.get(`http://localhost:5000/api/users/profile/${userId}`);
+        const res = await axios.get(`${API_BASE_URL}/users/profile/${userId}`);
         if (res.data) {
           setProfile(res.data);
           setUsername(res.data.Username || "");

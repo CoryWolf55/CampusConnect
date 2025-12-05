@@ -23,37 +23,37 @@ namespace CampusConnectAPI.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<Login>> Register([FromBody] Login login)
         {
-            // Check if email already exists
+            // Check if email exists
             if (await _context.Logins.AnyAsync(l => l.Email == login.Email))
                 return BadRequest("Email already registered");
 
-            // Hash the password BEFORE saving
+            // Hash password
             string plainPassword = login.PasswordHash;
             login.PasswordHash = _hasher.HashPassword(login, plainPassword);
 
+            // Add Login first
             _context.Logins.Add(login);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(); // generates login.Id
 
-            // Create an empty profile linked to this login
+            // Create Profile linked to Login
             var profile = new Profile
             {
-                Username = "",          
-                Major = null,
-                Year = null,
-                Description = null,
-                Login = login           // link profile to newly created login
+                Username = "", // non-nullable field
+                Login = login
             };
 
             _context.Profiles.Add(profile);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(); // now Profile has Id
 
-            // Optionally set the reverse navigation property
-            login.Profile = profile;
+            // Update Login.ProfileId (optional, if FK exists)
             login.ProfileId = profile.Id;
+            login.Profile = profile;
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetLogin), new { email = login.Email }, login);
         }
+
+
 
         // Validate login credentials
         [HttpPost("validate")]
@@ -146,13 +146,14 @@ namespace CampusConnectAPI.Controllers
         }
 
 
-        //Get all communities from the campus by email domain
+        //Get all communities from the campus by email
         [HttpGet("community")]
-        public async Task<ActionResult<IEnumerable<Community>>> GetCommunities([FromQuery] string emailDomain)
+        public async Task<ActionResult<IEnumerable<Community>>> GetCommunities([FromQuery] string email)
         {
-            if (string.IsNullOrWhiteSpace(emailDomain))
+            if (string.IsNullOrWhiteSpace(email))
                 return BadRequest("Email domain is required.");
 
+            var emailDomain = email.Split('@').Last();
             // Find the campus by email domain and include its communities
             var campus = await _context.Campuses
                 .Include(c => c.Communities)
@@ -193,5 +194,5 @@ namespace CampusConnectAPI.Controllers
             return Ok(campus);
         }
 
-
+    }
     }

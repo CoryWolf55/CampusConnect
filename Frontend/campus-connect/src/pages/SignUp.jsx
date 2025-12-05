@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_BASE_URL } from "../config";
 import '../styles/LoginSignup.css'; // reuse the same CSS
 
 function SignUp() {
@@ -9,27 +10,45 @@ function SignUp() {
   const navigate = useNavigate();
 
   const saveLogin = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      const response = await axios.post(
-        "http://localhost:5000/api/users/register",
-        {
-          email: email,
-          passwordHash: password,
-        }
-      );
+  try {
+    const response = await axios.post(
+      `${API_BASE_URL}/users/register`,
+      { Email: email, PasswordHash: password }
+    );
 
-      if (response.data === true) {
-        navigate("/");
-      } else {
-        alert("Invalid credentials");
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      alert("Login failed. Check the console.");
+    console.log("Server response:", response);
+
+    if (response.status === 201) {
+      const user = response.data;
+      localStorage.setItem("userId", user.id);
+      localStorage.setItem("userEmail", user.email);
+      navigate("/profilecreate"); // go to profile creation
+    } else {
+      alert("Unexpected response: " + JSON.stringify(response.data));
     }
-  };
+
+  } catch (error) {
+    console.error("Full error object:", error);
+
+    if (error.response) {
+      // Server responded with status code outside 2xx
+      console.error("Server response data:", error.response.data);
+      console.error("Server response status:", error.response.status);
+      console.error("Server headers:", error.response.headers);
+      alert("Sign-up failed: " + JSON.stringify(error.response.data));
+    } else if (error.request) {
+      // Request was made but no response received
+      console.error("No response received, request object:", error.request);
+      alert("Sign-up failed: No response from server (check server is running and CORS).");
+    } else {
+      // Something else caused the error
+      console.error("Error setting up request:", error.message);
+      alert("Sign-up failed: " + error.message);
+    }
+  }
+};
 
   return (
     <div className="page">
