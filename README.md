@@ -139,6 +139,13 @@ Open a pull request.
 
 This project is licensed under the MIT License.
 
+**What I learned**
+React,
+How to connect the frontend to the API,
+GET and PUSH usage,
+Rate limiting and protecting the API,
+Connecting the database to the API
+
 ## **Contact**
 
 Cory Wolf
