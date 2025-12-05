@@ -48,11 +48,9 @@
 
 Configure the database connection in appsettings.Development.json (not tracked in Git):
 
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Database=CampusConnect;User Id=YOUR_USER;Password=YOUR_PASSWORD;"
-  }
-}
+
+
+` "ConnectionStrings":{"DefaultConnection": "Server=localhost;Database=CampusConnect;User Id=YOUR_USER;Password=YOUR_PASSWORD;"}`
 
 
 Apply migrations and create the database:
@@ -78,10 +76,8 @@ npm install
 
 Run the React app:
 
-npm start
+npm run dev
 
-
-Access the app at http://localhost:3000.
 
 ## **Usage**
 
@@ -99,11 +95,17 @@ Add screenshots or GIFs of your login, profile page, and dashboard here.
 
 ## **Project Structure**
 CampusConnect/
+
 ─ CampusConnectAPI/      # .NET backend
+
 ─ Frontend/             # React frontend
+
 ─ SQL/                  # Database scripts
+
 ─ docs/                 # Optional documentation & diagrams
+
 ─ .gitignore
+
 ─ README.md
 
 ## **Security**
@@ -139,11 +141,16 @@ Open a pull request.
 
 This project is licensed under the MIT License.
 
-**What I learned**
+## **What I learned**
+
 React,
+
 How to connect the frontend to the API,
+
 GET and PUSH usage,
+
 Rate limiting and protecting the API,
+
 Connecting the database to the API
 
 ## **Contact**
