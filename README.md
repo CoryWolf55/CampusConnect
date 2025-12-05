@@ -89,9 +89,16 @@ Dashboard: Access posts, threads, and other user profiles.
 
 Edit Profile: Update your information anytime.
 
-Screenshots / Demo
+### Screenshots / Demo
 
-Add screenshots or GIFs of your login, profile page, and dashboard here.
+### 🔹 Login Page
+![Login Page](./screenshots/SignUpPage.png)
+
+### 🔹 Profile Page
+![Profile](./screenshots/ProfilePage.png)
+
+### 🔹 Forums
+![Forums](./screenshots/ForumsPage.png)
 
 ## **Project Structure**
 CampusConnect/
