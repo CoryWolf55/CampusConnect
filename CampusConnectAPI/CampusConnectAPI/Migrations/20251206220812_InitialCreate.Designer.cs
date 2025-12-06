@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CampusConnectAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251127163914_InitialCreate")]
+    [Migration("20251206220812_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -151,11 +151,9 @@ namespace CampusConnectAPI.Migrations
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Password")
-                        .IsRequired()
+                    b.Property<string>("PasswordHash")
                         .HasColumnType("longtext");
 
                     b.Property<int?>("ProfileId")
@@ -215,7 +213,6 @@ namespace CampusConnectAPI.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("Username")
-                        .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<int?>("Year")

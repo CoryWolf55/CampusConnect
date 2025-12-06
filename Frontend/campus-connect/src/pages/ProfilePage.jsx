@@ -10,32 +10,27 @@ function ProfilePage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Mock profile fallback
-    const mockData = {
-      Username: "Test User",
-      Major: "Computer Science",
-      Year: "Sophomore",
-      Description: "This is a mock profile.",
-      ProfileClubs: "Chess Club, Coding Club",
-      ProfileCourses: "CS101, CS102",
-    };
-
-    if (!userId) {
-      setProfile(mockData);
-      setLoading(false);
-      return;
-    }
-
     const fetchProfile = async () => {
-      try {
-        const res = await fetch(`${API_BASE_URL}/profile/${userId}`, {
-          credentials: "include",
+      if (!userId) {
+        // fallback mock
+        setProfile({
+          Username: "Test User",
+          Major: "Computer Science",
+          Year: "Sophomore",
+          Description: "This is a mock profile.",
+          ProfileClubs: "Chess Club, Coding Club",
+          ProfileCourses: "CS101, CS102",
         });
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/users/profile/${userId}`);
         const data = await res.json();
-        setProfile(data || mockData);
+        setProfile(data);
       } catch (err) {
         console.error("Error fetching profile:", err);
-        setProfile(mockData);
       } finally {
         setLoading(false);
       }
@@ -51,22 +46,18 @@ function ProfilePage() {
 
   return (
     <div className="profile-page-wrapper">
-
-      {/* HEADER */}
       <header className="profile-header">
         <div className="logo">CampusConnect</div>
-
         <button
           className="profile-header-btn"
           onClick={() =>
-            navigate("/profilecreate", { state: { profile: profile } })
+            navigate("/profilecreate", { state: { profile } })
           }
         >
           Edit Profile
         </button>
       </header>
 
-      {/* DASHBOARD NAVBAR (same as dashboard) */}
       <nav className="navbar">
         <ul>
           <li onClick={() => handleNavClick("/dashboard")}>Dashboard</li>
@@ -76,22 +67,18 @@ function ProfilePage() {
         </ul>
       </nav>
 
-      {/* MAIN CONTENT */}
       <div className="profile-content">
-        {/* Left column */}
         <div className="profile-left">
           <img
             className="profile-avatar"
             src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
             alt="Profile"
           />
-
           <h2 className="profile-username">{profile.Username}</h2>
-          <p className="profile-major">{profile.major}</p>
-          <p className="profile-year">{profile.year}</p>
+          <p className="profile-major">{profile.Major}</p>
+          <p className="profile-year">{profile.Year}</p>
         </div>
 
-        {/* Right column */}
         <div className="profile-right">
           <h3>About Me</h3>
           <p className="profile-description">{profile.Description}</p>

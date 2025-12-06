@@ -122,28 +122,41 @@ namespace CampusConnectAPI.Controllers
 
 
         [HttpPost("profile")]
-        public async Task<ActionResult<Profile>> RegisterProfile([FromBody] Profile request)
+        public async Task<ActionResult<Profile>> RegisterOrUpdateProfile([FromBody] Profile request)
         {
-            // Find the profile using the linked login
+            if (request.LoginId == 0)
+                return BadRequest("LoginId is required.");
+
             var profile = await _context.Profiles
-                .Include(p => p.Login)                 // include the login navigation
-                .FirstOrDefaultAsync(p => p.Login!.Id == request.Login!.Id);
+                .Include(p => p.Login)
+                .FirstOrDefaultAsync(p => p.LoginId == request.LoginId);
 
             if (profile == null)
-                return NotFound("Profile not found");
-
-            // Update profile fields
-            profile.Username = request.Username;
-            profile.Major = request.Major;
-            profile.Year = request.Year;
-            profile.Description = request.Description;
-            profile.ProfileClubs = request.ProfileClubs;
-            profile.ProfileCourses = request.ProfileCourses;
+            {
+                // Profile doesn't exist yet, create it
+                profile = new Profile
+                {
+                    LoginId = request.LoginId,
+                    Username = request.Username,
+                    Major = request.Major,
+                    Year = request.Year,
+                    Description = request.Description
+                };
+                _context.Profiles.Add(profile);
+            }
+            else
+            {
+                // Update existing
+                profile.Username = request.Username;
+                profile.Major = request.Major;
+                profile.Year = request.Year;
+                profile.Description = request.Description;
+            }
 
             await _context.SaveChangesAsync();
-
             return Ok(profile);
         }
+
 
 
         //Get all communities from the campus by email

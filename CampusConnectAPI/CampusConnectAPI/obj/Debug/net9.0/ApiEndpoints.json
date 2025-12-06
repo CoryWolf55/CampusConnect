@@ -79,7 +79,7 @@
   },
   {
     "ContainingType": "CampusConnectAPI.Controllers.UsersController",
-    "Method": "RegisterProfile",
+    "Method": "RegisterOrUpdateProfile",
     "RelativePath": "api/Users/profile",
     "HttpMethod": "POST",
     "IsController": true,
@@ -87,13 +87,13 @@
     "Parameters": [
       {
         "Name": "request",
-        "Type": "CampusConnectAPI.Models.Profile",
+        "Type": "Profile",
         "IsRequired": true
       }
     ],
     "ReturnTypes": [
       {
-        "Type": "CampusConnectAPI.Models.Profile",
+        "Type": "Profile",
         "MediaTypes": [
           "text/plain",
           "application/json",

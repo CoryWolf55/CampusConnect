@@ -21,18 +21,18 @@ function LoginPage() {
         }
       );
 
-      if (response === null) return;
+      if (!response || !response.data) return;
+
       const user = response.data;
 
+      // Save login info
       localStorage.setItem("userId", user.id);
       localStorage.setItem("userEmail", user.email);
 
-      
-      const profileCreated = await axios.get(
-        `${API_BASE_URL}/users/profile/find/${user.id}`
-      );
+      // Check if profile exists
+      const profileCheck = await axios.get(`${API_BASE_URL}/users/profile/find/${user.id}`);
 
-      if (profileCreated === false) {
+      if (profileCheck.data === false) {
         navigate("/profilecreate");
       } else {
         navigate("/dashboard");
@@ -49,38 +49,37 @@ function LoginPage() {
   };
 
   return (
-  <div className="page">
-  <div className="container">
-    <div className="header">
-      <div className="text">Login</div>
-      <div className="underline"></div>
+    <div className="page">
+      <div className="container">
+        <div className="header">
+          <div className="text">Login</div>
+          <div className="underline"></div>
+        </div>
+
+        <form onSubmit={handleLogin}>
+          <div className="input">
+            <label>Email:</label>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          </div>
+
+          <div className="input">
+            <label>Password:</label>
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          </div>
+
+          <div className="button-container">
+            <button type="submit">Login</button>
+          </div>
+        </form>
+
+        <form onSubmit={createAccount}>
+          <div className="button-container">
+            <button type="submit">Sign Up</button>
+          </div>
+        </form>
+      </div>
     </div>
-
-    <form onSubmit={handleLogin}>
-      <div className="input">
-        <label>Email:</label>
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-      </div>
-
-      <div className="input">
-        <label>Password:</label>
-        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-      </div>
-
-      <div className="button-container">
-        <button type="submit">Login</button>
-      </div>
-    </form>
-
-    <form onSubmit={createAccount}>
-      <div className="button-container">
-        <button type="submit">Sign Up</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-);
+  );
 }
 
 export default LoginPage;

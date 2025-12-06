@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { API_BASE_URL } from "../config";
 import axios from "axios";
 
 function ProfileCreationPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -18,30 +19,27 @@ function ProfileCreationPage() {
 
   const userId = localStorage.getItem("userId");
 
-  // Fetch existing profile if it exists, or use mock data
+  // Populate form if editing
   useEffect(() => {
+    const data = location.state?.profile;
+    if (data) {
+      setProfile(data);
+      setUsername(data.Username || "");
+      setMajor(data.Major || "");
+      setYear(data.Year || "");
+      setDescription(data.Description || "");
+      setClubs(data.ProfileClubs || "");
+      setCourses(data.ProfileCourses || "");
+      setLoading(false);
+      return;
+    }
+
+    // Fetch profile from API if no state passed
     const fetchProfile = async () => {
       if (!userId) {
-        // MOCK DATA for testing
-        const mockData = {
-          Username: "Test User",
-          Major: "Computer Science",
-          Year: "Sophomore",
-          Description: "This is a mock profile.",
-          ProfileClubs: "Chess Club, Coding Club",
-          ProfileCourses: "CS101, CS102",
-        };
-        setProfile(mockData);
-        setUsername(mockData.Username);
-        setMajor(mockData.Major);
-        setYear(mockData.Year);
-        setDescription(mockData.Description);
-        setClubs(mockData.ProfileClubs);
-        setCourses(mockData.ProfileCourses);
         setLoading(false);
         return;
       }
-
       try {
         const res = await axios.get(`${API_BASE_URL}/users/profile/${userId}`);
         if (res.data) {
@@ -61,28 +59,28 @@ function ProfileCreationPage() {
     };
 
     fetchProfile();
-  }, [userId]);
+  }, [userId, location.state]);
 
   const saveProfile = async (e) => {
     e.preventDefault();
-    try {
-      const payload = { username, major, year, description, clubs, courses };
-      
-      if (!userId) {
-        // For testing without API
-        console.log("Mock save:", payload);
-        alert("Profile saved (mock)!");
-        setProfile(payload); // update the state as if saved
-        return;
-      }
+    if (!userId) {
+      alert("No user logged in!");
+      return;
+    }
 
-      const res = await axios.post("http://localhost:5000/api/users/profile", payload);
-      if (res.status >= 200 && res.status < 300) {
-        alert("Profile saved successfully!");
-        navigate("/profile");
-      } else {
-        alert("Failed to save profile. Try again.");
-      }
+    try {
+      const payload = {
+        username,
+        major,
+        year: Number(year),
+        description,
+        clubs,
+        courses,
+        loginId: Number(userId)
+      };
+
+      await axios.post(`${API_BASE_URL}/users/profile`, payload);
+      navigate("/profilepage");
     } catch (err) {
       console.error("Error saving profile:", err);
       alert("Error saving profile.");
@@ -91,13 +89,11 @@ function ProfileCreationPage() {
 
   if (loading) return <div>Loading...</div>;
 
-  const isEditMode = profile !== null;
-
   return (
     <div className="page">
       <div className="container">
         <div className="header">
-          <h2>{isEditMode ? "Edit Profile" : "Create Profile"}</h2>
+          <h2>{profile ? "Edit Profile" : "Create Profile"}</h2>
           <div className="underline"></div>
         </div>
 
@@ -133,7 +129,7 @@ function ProfileCreationPage() {
           </div>
 
           <div className="button-container">
-            <button type="submit">{isEditMode ? "Update Profile" : "Create Profile"}</button>
+            <button type="submit">{profile ? "Update Profile" : "Create Profile"}</button>
           </div>
         </form>
       </div>

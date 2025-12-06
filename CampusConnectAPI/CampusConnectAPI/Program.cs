@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json.Serialization; // <-- add this
 using CampusConnectAPI.DB;
 using CampusConnectAPI.Backend.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +14,15 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     )
 );
 
-builder.Services.AddControllers();
+// ---- Updated AddControllers with JSON options ----
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Ignore circular references globally
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.WriteIndented = true; // optional, pretty print
+    });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -40,9 +49,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-
 app.UseCors();
-
 
 app.UseAuthorization();
 

@@ -1,1 +1,0 @@
-//This is accessed from the navbar where you can see and join communities that are at your campus
