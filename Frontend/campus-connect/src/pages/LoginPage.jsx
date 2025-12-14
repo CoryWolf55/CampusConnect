@@ -10,37 +10,34 @@ function LoginPage() {
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      const response = await axios.post(
-        `${API_BASE_URL}/users/validate`,
-        {
-          email: email,
-          passwordHash: password,
-        }
-      );
+  try {
+    const response = await axios.post(`${API_BASE_URL}/users/validate`, {
+      email: email,
+      passwordHash: password,
+    });
 
-      if (!response || !response.data) return;
+    if (!response || !response.data) return;
 
-      const user = response.data;
+    const user = response.data;
 
-      // Save login info
-      localStorage.setItem("userId", user.id);
-      localStorage.setItem("userEmail", user.email);
+    // Save login info
+    localStorage.setItem("userId", user.id);
+    localStorage.setItem("userEmail", user.email);
 
-      // Check if profile exists
-      const profileCheck = await axios.get(`${API_BASE_URL}/users/profile/find/${user.id}`);
+    // Check if profile exists using loginId
+    const profileCheck = await axios.get(`${API_BASE_URL}/users/profile/by-login/${user.id}`);
 
-      if (profileCheck.data === false) {
-        navigate("/profilecreate");
-      } else {
-        navigate("/dashboard");
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      alert("Login failed. Check the console.");
+    if (!profileCheck.data || profileCheck.status === 404) {
+      navigate("/profilecreate");
+    } else {
+      navigate("/dashboard");
     }
+    } catch (error) {
+     console.error("Login error:", error);
+      alert("Login failed. Check the console.");
+  }
   };
 
   const createAccount = (e) => {

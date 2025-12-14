@@ -9,7 +9,6 @@ function ProfileCreationPage() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Form state
   const [username, setUsername] = useState("");
   const [major, setMajor] = useState("");
   const [year, setYear] = useState("");
@@ -19,37 +18,33 @@ function ProfileCreationPage() {
 
   const userId = localStorage.getItem("userId");
 
-  // Populate form if editing
   useEffect(() => {
     const data = location.state?.profile;
     if (data) {
       setProfile(data);
-      setUsername(data.Username || "");
-      setMajor(data.Major || "");
-      setYear(data.Year || "");
-      setDescription(data.Description || "");
-      setClubs(data.ProfileClubs || "");
-      setCourses(data.ProfileCourses || "");
+      setUsername(data.username || "");
+      setMajor(data.major || "");
+      setYear(data.year || "");
+      setDescription(data.description || "");
+      setClubs(data.profileClubs?.join(", ") || "");
+      setCourses(data.profileCourses?.join(", ") || "");
       setLoading(false);
       return;
     }
 
-    // Fetch profile from API if no state passed
     const fetchProfile = async () => {
-      if (!userId) {
-        setLoading(false);
-        return;
-      }
+      if (!userId) return setLoading(false);
+
       try {
-        const res = await axios.get(`${API_BASE_URL}/users/profile/${userId}`);
+        const res = await axios.get(`${API_BASE_URL}/users/profile/by-login/${userId}`);
         if (res.data) {
           setProfile(res.data);
-          setUsername(res.data.Username || "");
-          setMajor(res.data.Major || "");
-          setYear(res.data.Year || "");
-          setDescription(res.data.Description || "");
-          setClubs(res.data.ProfileClubs || "");
-          setCourses(res.data.ProfileCourses || "");
+          setUsername(res.data.username || "");
+          setMajor(res.data.major || "");
+          setYear(res.data.year || "");
+          setDescription(res.data.description || "");
+          setClubs(res.data.profileClubs?.join(", ") || "");
+          setCourses(res.data.profileCourses?.join(", ") || "");
         }
       } catch (err) {
         console.error("Error fetching profile:", err);
@@ -61,35 +56,79 @@ function ProfileCreationPage() {
     fetchProfile();
   }, [userId, location.state]);
 
+  // Add clubs after profile is created
+  const addClubs = async (profileId) => {
+  if (!clubs.trim()) return;
+
+  const clubNames = clubs.split(",").map(c => c.trim()).filter(Boolean);
+
+  for (const name of clubNames) {
+    try {
+      await axios.post(`${API_BASE_URL}/users/profile/clubs`, [
+        { ProfileId: profileId, Club: { Name: name } }
+      ]);
+    } catch (err) {
+      console.error(`Error adding club "${name}":`, err.response?.data || err);
+    }
+  }
+};
+
+  // Add courses after profile is created
+  const addCourses = async (profileId) => {
+  if (!courses.trim()) return;
+
+  const courseNames = courses.split(",").map(c => c.trim()).filter(Boolean);
+
+  for (const name of courseNames) {
+    try {
+      await axios.post(`${API_BASE_URL}/users/profile/courses`, [
+        { ProfileId: profileId, Course: { Name: name } }
+      ]);
+    } catch (err) {
+      console.error(`Error adding course "${name}":`, err.response?.data || err);
+    }
+  }
+};
+
   const saveProfile = async (e) => {
     e.preventDefault();
-    if (!userId) {
-      alert("No user logged in!");
-      return;
-    }
+    if (!userId) return alert("No user logged in!");
 
     try {
+      // Send profile first without clubs/courses
       const payload = {
-        username,
-        major,
-        year: Number(year),
-        description,
-        clubs,
-        courses,
-        loginId: Number(userId)
+        LoginId: Number(userId),
+        Username: username.trim(),
+        Major: major.trim(),
+        Year: Number(year),
+        Description: description.trim(),
       };
 
-      await axios.post(`${API_BASE_URL}/users/profile`, payload);
+      const res = await axios.post(`${API_BASE_URL}/users/profile`, payload);
+      const createdProfile = res.data;
+      console.log("Profile created:", createdProfile);
+
+      if (!createdProfile.id) {
+        alert("Profile ID missing! Cannot add clubs/courses.");
+        return;
+      }
+
+      // Add clubs and courses
+      await addClubs(createdProfile.id);
+      await addCourses(createdProfile.id);
+
       navigate("/profilepage");
     } catch (err) {
-      console.error("Error saving profile:", err);
-      alert("Error saving profile.");
+      console.error("Error saving profile:", err.response?.data || err);
+      alert("Error saving profile. Check console.");
     }
   };
 
   if (loading) return <div>Loading...</div>;
 
-  return (
+  if (loading) return <div>Loading...</div>;
+
+   return (
     <div className="page">
       <div className="container">
         <div className="header">

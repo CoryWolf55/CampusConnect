@@ -22,7 +22,7 @@ function SignUp() {
 
     if (response.status === 201) {
       const user = response.data;
-      localStorage.setItem("userId", user.id);
+      localStorage.setItem("userId", response.data.id); // ensure it’s the number
       localStorage.setItem("userEmail", user.email);
       navigate("/profilecreate"); // go to profile creation
     } else {

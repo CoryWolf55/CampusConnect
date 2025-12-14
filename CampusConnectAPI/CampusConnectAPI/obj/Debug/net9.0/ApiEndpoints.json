@@ -27,8 +27,8 @@
   },
   {
     "ContainingType": "CampusConnectAPI.Controllers.UsersController",
-    "Method": "GetCampus",
-    "RelativePath": "api/Users/campus",
+    "Method": "GetCommunities",
+    "RelativePath": "api/Users/community",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
@@ -37,32 +37,6 @@
         "Name": "email",
         "Type": "System.String",
         "IsRequired": true
-      }
-    ],
-    "ReturnTypes": [
-      {
-        "Type": "CampusConnectAPI.Models.Campus",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
-  },
-  {
-    "ContainingType": "CampusConnectAPI.Controllers.UsersController",
-    "Method": "GetCommunities",
-    "RelativePath": "api/Users/community",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "email",
-        "Type": "System.String",
-        "IsRequired": false
       }
     ],
     "ReturnTypes": [
@@ -105,55 +79,51 @@
   },
   {
     "ContainingType": "CampusConnectAPI.Controllers.UsersController",
-    "Method": "GetProfile",
-    "RelativePath": "api/Users/profile/{id}",
+    "Method": "GetProfileByLoginId",
+    "RelativePath": "api/Users/profile/by-login/{loginId}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "id",
+        "Name": "loginId",
         "Type": "System.Int32",
         "IsRequired": true
       }
     ],
-    "ReturnTypes": [
-      {
-        "Type": "System.Boolean",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
+    "ReturnTypes": []
   },
   {
     "ContainingType": "CampusConnectAPI.Controllers.UsersController",
-    "Method": "ProfileFound",
-    "RelativePath": "api/Users/profile/find/{id}",
-    "HttpMethod": "GET",
+    "Method": "AddProfileClubs",
+    "RelativePath": "api/Users/profile/clubs",
+    "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "id",
-        "Type": "System.Int32",
+        "Name": "clubs",
+        "Type": "System.Collections.Generic.List\u00601[[CampusConnectAPI.Models.ProfileClub, CampusConnectAPI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "IsRequired": true
       }
     ],
-    "ReturnTypes": [
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "CampusConnectAPI.Controllers.UsersController",
+    "Method": "AddProfileCourses",
+    "RelativePath": "api/Users/profile/courses",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
       {
-        "Type": "System.Boolean",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
+        "Name": "courses",
+        "Type": "System.Collections.Generic.List\u00601[[CampusConnectAPI.Models.ProfileCourse, CampusConnectAPI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "IsRequired": true
       }
-    ]
+    ],
+    "ReturnTypes": []
   },
   {
     "ContainingType": "CampusConnectAPI.Controllers.UsersController",
@@ -195,16 +165,6 @@
         "IsRequired": true
       }
     ],
-    "ReturnTypes": [
-      {
-        "Type": "System.Boolean",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
+    "ReturnTypes": []
   }
 ]

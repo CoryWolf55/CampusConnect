@@ -10,34 +10,45 @@ function ProfilePage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      if (!userId) {
-        // fallback mock
-        setProfile({
-          Username: "Test User",
-          Major: "Computer Science",
-          Year: "Sophomore",
-          Description: "This is a mock profile.",
-          ProfileClubs: "Chess Club, Coding Club",
-          ProfileCourses: "CS101, CS102",
-        });
-        setLoading(false);
+  const fetchProfile = async () => {
+    const mockProfile = {
+      Username: "Test User",
+      Major: "Computer Science",
+      Year: "Sophomore",
+      Description: "This is a mock profile.",
+      ProfileClubs: "Chess Club, Coding Club",
+      ProfileCourses: "CS101, CS102",
+    };
+
+    if (!userId) {
+      setProfile(mockProfile);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}/users/profile/by-login/${userId}`
+      );
+
+      if (!res.ok) {
+        console.warn("Profile fetch failed, using mock");
+        setProfile(mockProfile);
         return;
       }
 
-      try {
-        const res = await fetch(`${API_BASE_URL}/users/profile/${userId}`);
-        const data = await res.json();
-        setProfile(data);
-      } catch (err) {
-        console.error("Error fetching profile:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+      const data = await res.json();
+      setProfile(data);
+    } catch (err) {
+      console.error("Error fetching profile:", err);
+      setProfile(mockProfile); 
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchProfile();
-  }, [userId]);
+  fetchProfile();
+}, [userId]);
 
   const handleNavClick = (path) => navigate(path);
 
@@ -74,20 +85,20 @@ function ProfilePage() {
             src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
             alt="Profile"
           />
-          <h2 className="profile-username">{profile.Username}</h2>
-          <p className="profile-major">{profile.Major}</p>
-          <p className="profile-year">{profile.Year}</p>
+          <h2 className="profile-username">{profile.username}</h2>
+          <p className="profile-major">{profile.major}</p>
+          <p className="profile-year">{profile.year}</p>
         </div>
 
         <div className="profile-right">
           <h3>About Me</h3>
-          <p className="profile-description">{profile.Description}</p>
+          <p className="profile-description">{profile.description}</p>
 
           <h3>Clubs</h3>
-          <p>{profile.ProfileClubs}</p>
+          <p>{profile.profileClubs && profile.profileClubs.length > 0 ? profile.profileClubs.join(", ") : "None"}</p>
 
           <h3>Courses</h3>
-          <p>{profile.ProfileCourses}</p>
+          <p>{profile.profileCourses && profile.profileCourses.length > 0 ? profile.profileCourses.join(", ") : "None"}</p>
         </div>
       </div>
     </div>
