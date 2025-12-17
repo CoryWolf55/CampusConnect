@@ -67,6 +67,13 @@ namespace CampusConnectAPI.DB
                 .HasColumnType("datetime")
                 .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
+            // ====================== Profile → Campus ======================
+            modelBuilder.Entity<Profile>()
+                .HasOne(p => p.Campus)
+                .WithMany(c => c.Profiles)
+                .HasForeignKey(p => p.CampusId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             // ====================== Optional: Configure relationships ======================
             modelBuilder.Entity<Club>()
                 .HasOne(c => c.Campus)

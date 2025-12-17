@@ -8,6 +8,9 @@ namespace CampusConnectAPI.Models
         public string Name { get; set; } = null!;
         public string EmailDomain { get; set; } = null!;
 
+
+        public ICollection<Profile> Profiles { get; set; }
+
         public virtual ICollection<Club> Clubs { get; set; } = new List<Club>();
         public virtual ICollection<Community> Communities { get; set; } = new List<Community>();
     }

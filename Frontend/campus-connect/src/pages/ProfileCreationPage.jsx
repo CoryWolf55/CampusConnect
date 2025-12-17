@@ -60,35 +60,32 @@ function ProfileCreationPage() {
   const addClubs = async (profileId) => {
   if (!clubs.trim()) return;
 
-  const clubNames = clubs.split(",").map(c => c.trim()).filter(Boolean);
+  const clubNames = clubs
+    .split(",")
+    .map(c => c.trim())
+    .filter(Boolean);
 
-  for (const name of clubNames) {
-    try {
-      await axios.post(`${API_BASE_URL}/users/profile/clubs`, [
-        { ProfileId: profileId, Club: { Name: name } }
-      ]);
-    } catch (err) {
-      console.error(`Error adding club "${name}":`, err.response?.data || err);
-    }
-  }
+  await axios.post(`${API_BASE_URL}/users/profile/clubs`, {
+    profileId,
+    clubs: clubNames
+  });
 };
 
   // Add courses after profile is created
   const addCourses = async (profileId) => {
   if (!courses.trim()) return;
 
-  const courseNames = courses.split(",").map(c => c.trim()).filter(Boolean);
+  const courseNames = courses
+    .split(",")
+    .map(c => c.trim())
+    .filter(Boolean);
 
-  for (const name of courseNames) {
-    try {
-      await axios.post(`${API_BASE_URL}/users/profile/courses`, [
-        { ProfileId: profileId, Course: { Name: name } }
-      ]);
-    } catch (err) {
-      console.error(`Error adding course "${name}":`, err.response?.data || err);
-    }
-  }
+  await axios.post(`${API_BASE_URL}/users/profile/courses`, {
+    profileId,
+    courses: courseNames
+  });
 };
+
 
   const saveProfile = async (e) => {
     e.preventDefault();

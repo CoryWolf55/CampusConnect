@@ -1,8 +1,9 @@
 ﻿using CampusConnectAPI.DB;
+using CampusConnectAPI.DTOs;
 using CampusConnectAPI.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
 
 namespace CampusConnectAPI.Controllers
 {
@@ -19,7 +20,7 @@ namespace CampusConnectAPI.Controllers
             _hasher = new PasswordHasher<Login>();
         }
 
-  
+
         [HttpPost("register")]
         public async Task<ActionResult<Login>> Register([FromBody] Login login)
         {
@@ -32,10 +33,30 @@ namespace CampusConnectAPI.Controllers
             _context.Logins.Add(login);
             await _context.SaveChangesAsync();
 
+            // Extract email domain
+            var emailDomain = login.Email.Split('@').Last();
+
+            // Check if campus exists, otherwise create it
+            var campus = await _context.Campuses
+                .FirstOrDefaultAsync(c => c.EmailDomain == emailDomain);
+
+            if (campus == null)
+            {
+                campus = new Campus
+                {
+                    Name = emailDomain, // you can adjust this to a friendly name
+                    EmailDomain = emailDomain
+                };
+                _context.Campuses.Add(campus);
+                await _context.SaveChangesAsync();
+            }
+
+            // Create profile
             var profile = new Profile
             {
                 LoginId = (int)login.Id,
-                Username = "",
+                CampusId = campus.Id,
+                Username = ""
             };
 
             _context.Profiles.Add(profile);
@@ -48,7 +69,7 @@ namespace CampusConnectAPI.Controllers
             return CreatedAtAction(nameof(GetLogin), new { email = login.Email }, login);
         }
 
-   
+
         [HttpPost("validate")]
         public async Task<ActionResult<object>> Validate([FromBody] Login loginDto)
         {
@@ -114,15 +135,28 @@ namespace CampusConnectAPI.Controllers
         [HttpPost("profile")]
         public async Task<ActionResult<Profile>> RegisterOrUpdateProfile([FromBody] Profile request)
         {
-
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-
 
             if (request.LoginId == 0)
                 return BadRequest("LoginId is required.");
 
-            // Fetch the profile including clubs/courses
+            // Get login to determine campus
+            var login = await _context.Logins
+                .FirstOrDefaultAsync(l => l.Id == request.LoginId);
+
+            if (login == null)
+                return BadRequest("Invalid LoginId.");
+
+            var emailDomain = login.Email.Split('@').Last();
+
+            var campus = await _context.Campuses
+                .FirstOrDefaultAsync(c => c.EmailDomain == emailDomain);
+
+            if (campus == null)
+                return BadRequest("No campus found for this email domain.");
+
+            // Fetch existing profile
             var profile = await _context.Profiles
                 .Include(p => p.ProfileClubs)
                     .ThenInclude(pc => pc.Club)
@@ -132,7 +166,7 @@ namespace CampusConnectAPI.Controllers
 
             if (profile == null)
             {
-                // Profile doesn't exist yet, create it
+                // CREATE
                 profile = new Profile
                 {
                     LoginId = request.LoginId,
@@ -140,18 +174,23 @@ namespace CampusConnectAPI.Controllers
                     Major = request.Major,
                     Year = request.Year,
                     Description = request.Description,
+                    CampusId = campus.Id 
                 };
+
                 _context.Profiles.Add(profile);
             }
             else
             {
-                // Update existing profile
+                // UPDATE
                 profile.Username = request.Username;
                 profile.Major = request.Major;
                 profile.Year = request.Year;
                 profile.Description = request.Description;
 
-                // Clear existing clubs/courses
+                // Ensure campus is set (failsafe)
+                if (profile.CampusId == 0)
+                    profile.CampusId = campus.Id;
+
                 profile.ProfileClubs.Clear();
                 profile.ProfileCourses.Clear();
             }
@@ -159,12 +198,20 @@ namespace CampusConnectAPI.Controllers
             // Handle Clubs
             if (request.ProfileClubs != null)
             {
-                foreach (var clubName in request.ProfileClubs.Select(pc => pc.Club?.Name).Where(n => !string.IsNullOrWhiteSpace(n)))
+                foreach (var clubName in request.ProfileClubs
+                    .Select(pc => pc.Club?.Name)
+                    .Where(n => !string.IsNullOrWhiteSpace(n)))
                 {
-                    var club = await _context.Clubs.FirstOrDefaultAsync(c => c.Name == clubName.Trim());
+                    var club = await _context.Clubs
+                        .FirstOrDefaultAsync(c => c.Name == clubName.Trim());
+
                     if (club == null)
                     {
-                        club = new Club { Name = clubName.Trim() };
+                        club = new Club
+                        {
+                            Name = clubName.Trim(),
+                            CampusId = campus.Id 
+                        };
                         _context.Clubs.Add(club);
                     }
 
@@ -179,9 +226,13 @@ namespace CampusConnectAPI.Controllers
             // Handle Courses
             if (request.ProfileCourses != null)
             {
-                foreach (var courseName in request.ProfileCourses.Select(pc => pc.Course?.Name).Where(n => !string.IsNullOrWhiteSpace(n)))
+                foreach (var courseName in request.ProfileCourses
+                    .Select(pc => pc.Course?.Name)
+                    .Where(n => !string.IsNullOrWhiteSpace(n)))
                 {
-                    var course = await _context.Courses.FirstOrDefaultAsync(c => c.Name == courseName.Trim());
+                    var course = await _context.Courses
+                        .FirstOrDefaultAsync(c => c.Name == courseName.Trim());
+
                     if (course == null)
                     {
                         course = new Course { Name = courseName.Trim() };
@@ -200,37 +251,42 @@ namespace CampusConnectAPI.Controllers
             return Ok(profile);
         }
 
+
         // POST: api/users/profile/clubs
         [HttpPost("profile/clubs")]
-        public async Task<ActionResult> AddProfileClubs([FromBody] List<ProfileClub> clubs)
+        public async Task<ActionResult> AddProfileClubs([FromBody] ProfileClubsDto dto)
         {
-            if (clubs == null || !clubs.Any())
-                return BadRequest("No clubs provided.");
+            if (dto.ProfileId == 0 || dto.Clubs.Count == 0)
+                return BadRequest("Invalid club data.");
 
-            foreach (var pc in clubs)
+            foreach (var clubName in dto.Clubs)
             {
-                // Check if club exists, otherwise create
-                var existingClub = await _context.Clubs.FirstOrDefaultAsync(c => c.Name == pc.Club.Name);
-                if (existingClub == null)
+                var trimmed = clubName.Trim();
+                if (string.IsNullOrWhiteSpace(trimmed)) continue;
+
+                var club = await _context.Clubs
+                    .FirstOrDefaultAsync(c => c.Name == trimmed);
+
+                if (club == null)
                 {
-                    existingClub = new Club
+                    club = new Club
                     {
-                        Name = pc.Club.Name,
-                        CampusId = 1 // or assign a default campus if needed
+                        Name = trimmed,
+                        CampusId = 1
                     };
-                    _context.Clubs.Add(existingClub);
+                    _context.Clubs.Add(club);
                     await _context.SaveChangesAsync();
                 }
 
-                // Prevent duplicates
-                var exists = await _context.ProfileClubs
-                    .AnyAsync(c => c.ProfileId == pc.ProfileId && c.ClubId == existingClub.Id);
+                bool exists = await _context.ProfileClubs.AnyAsync(pc =>
+                    pc.ProfileId == dto.ProfileId && pc.ClubId == club.Id);
+
                 if (!exists)
                 {
                     _context.ProfileClubs.Add(new ProfileClub
                     {
-                        ProfileId = pc.ProfileId,
-                        ClubId = existingClub.Id
+                        ProfileId = dto.ProfileId,
+                        ClubId = club.Id
                     });
                 }
             }
@@ -241,34 +297,35 @@ namespace CampusConnectAPI.Controllers
 
         // POST: api/users/profile/courses
         [HttpPost("profile/courses")]
-        public async Task<ActionResult> AddProfileCourses([FromBody] List<ProfileCourse> courses)
+        public async Task<ActionResult> AddProfileCourses([FromBody] ProfileCoursesDto dto)
         {
-            if (courses == null || !courses.Any())
-                return BadRequest("No courses provided.");
+            if (dto.ProfileId == 0 || dto.Courses.Count == 0)
+                return BadRequest("Invalid course data.");
 
-            foreach (var pc in courses)
+            foreach (var courseName in dto.Courses)
             {
-                // Check if course exists, otherwise create
-                var existingCourse = await _context.Courses.FirstOrDefaultAsync(c => c.Name == pc.Course.Name);
-                if (existingCourse == null)
+                var trimmed = courseName.Trim();
+                if (string.IsNullOrWhiteSpace(trimmed)) continue;
+
+                var course = await _context.Courses
+                    .FirstOrDefaultAsync(c => c.Name == trimmed);
+
+                if (course == null)
                 {
-                    existingCourse = new Course
-                    {
-                        Name = pc.Course.Name
-                    };
-                    _context.Courses.Add(existingCourse);
+                    course = new Course { Name = trimmed };
+                    _context.Courses.Add(course);
                     await _context.SaveChangesAsync();
                 }
 
-                // Prevent duplicates
-                var exists = await _context.ProfileCourses
-                    .AnyAsync(c => c.ProfileId == pc.ProfileId && c.CourseId == existingCourse.Id);
+                bool exists = await _context.ProfileCourses.AnyAsync(pc =>
+                    pc.ProfileId == dto.ProfileId && pc.CourseId == course.Id);
+
                 if (!exists)
                 {
                     _context.ProfileCourses.Add(new ProfileCourse
                     {
-                        ProfileId = pc.ProfileId,
-                        CourseId = existingCourse.Id
+                        ProfileId = dto.ProfileId,
+                        CourseId = course.Id
                     });
                 }
             }
@@ -276,7 +333,6 @@ namespace CampusConnectAPI.Controllers
             await _context.SaveChangesAsync();
             return Ok();
         }
-
 
         // Get communities by email domain
         [HttpPost("community")]

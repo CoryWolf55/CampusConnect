@@ -102,8 +102,8 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "clubs",
-        "Type": "System.Collections.Generic.List\u00601[[CampusConnectAPI.Models.ProfileClub, CampusConnectAPI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Name": "dto",
+        "Type": "CampusConnectAPI.DTOs.ProfileClubsDto",
         "IsRequired": true
       }
     ],
@@ -118,8 +118,8 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "courses",
-        "Type": "System.Collections.Generic.List\u00601[[CampusConnectAPI.Models.ProfileCourse, CampusConnectAPI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Name": "dto",
+        "Type": "CampusConnectAPI.DTOs.ProfileCoursesDto",
         "IsRequired": true
       }
     ],

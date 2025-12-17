@@ -11,6 +11,8 @@ public partial class Profile
     // Add this:
     public int LoginId { get; set; }  // scalar FK
     public virtual Login? Login { get; set; } = null!;
+    public int? CampusId { get; set; }
+    public Campus? Campus { get; set; }
 
     public virtual ICollection<Post>? Posts { get; set; } = new List<Post>();
     public virtual ICollection<ForumThread>? ForumThreads { get; set; } = new List<ForumThread>();

@@ -203,26 +203,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/ProfileClub"
-                }
+                "$ref": "#/components/schemas/ProfileClubsDto"
               }
             },
             "text/json": {
               "schema": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/ProfileClub"
-                }
+                "$ref": "#/components/schemas/ProfileClubsDto"
               }
             },
             "application/*+json": {
               "schema": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/ProfileClub"
-                }
+                "$ref": "#/components/schemas/ProfileClubsDto"
               }
             }
           }
@@ -243,26 +234,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/ProfileCourse"
-                }
+                "$ref": "#/components/schemas/ProfileCoursesDto"
               }
             },
             "text/json": {
               "schema": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/ProfileCourse"
-                }
+                "$ref": "#/components/schemas/ProfileCoursesDto"
               }
             },
             "application/*+json": {
               "schema": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/ProfileCourse"
-                }
+                "$ref": "#/components/schemas/ProfileCoursesDto"
               }
             }
           }
@@ -347,6 +329,13 @@
           },
           "emailDomain": {
             "type": "string",
+            "nullable": true
+          },
+          "profiles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Profile"
+            },
             "nullable": true
           },
           "clubs": {
@@ -578,6 +567,14 @@
           "login": {
             "$ref": "#/components/schemas/Login"
           },
+          "campusId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "campus": {
+            "$ref": "#/components/schemas/Campus"
+          },
           "posts": {
             "type": "array",
             "items": {
@@ -637,6 +634,23 @@
         },
         "additionalProperties": false
       },
+      "ProfileClubsDto": {
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "clubs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "ProfileCourse": {
         "type": "object",
         "properties": {
@@ -654,6 +668,23 @@
           },
           "course": {
             "$ref": "#/components/schemas/Course"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ProfileCoursesDto": {
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "courses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
