@@ -35,6 +35,7 @@ namespace CampusConnectAPI.Controllers
 
             // Extract email domain
             var emailDomain = login.Email.Split('@').Last();
+            var campusName = emailDomain.Split('.').First();
 
             // Check if campus exists, otherwise create it
             var campus = await _context.Campuses
@@ -44,7 +45,7 @@ namespace CampusConnectAPI.Controllers
             {
                 campus = new Campus
                 {
-                    Name = emailDomain, // you can adjust this to a friendly name
+                    Name = campusName, 
                     EmailDomain = emailDomain
                 };
                 _context.Campuses.Add(campus);
@@ -334,24 +335,6 @@ namespace CampusConnectAPI.Controllers
             return Ok();
         }
 
-        // Get communities by email domain
-        [HttpPost("community")]
-        public async Task<ActionResult<IEnumerable<Community>>> GetCommunities([FromBody] string email)
-        {
-            if (string.IsNullOrWhiteSpace(email))
-                return BadRequest("Email is required.");
-
-            var emailDomain = email.Split('@').Last();
-
-            var campus = await _context.Campuses
-                .Include(c => c.Communities)
-                .FirstOrDefaultAsync(c => c.EmailDomain == emailDomain);
-
-            if (campus == null)
-                return NotFound();
-
-            return Ok(campus.Communities);
-        }
 
     }
 }

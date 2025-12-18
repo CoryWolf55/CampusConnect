@@ -1,26 +1,26 @@
-.forums-page, .forum-thread-page {
+.dashboard-page {
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.forum-thread-container {
   max-width: 800px;
-  margin: 50px auto;
-  padding: 20px;
+  width: 100%;
   background: #f5f5f5;
+  padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
 }
 
-.forum-list {
-  list-style: none;
-  padding: 0;
-}
-
-.forum-item {
-  padding: 15px;
+.thread-header {
   border-bottom: 1px solid #ccc;
-  cursor: pointer;
-  transition: background 0.2s;
+  margin-bottom: 20px;
 }
 
-.forum-item:hover {
-  background: #e0e0ff;
+.thread-author {
+  font-size: 14px;
+  color: #666;
 }
 
 .post-list {
@@ -29,26 +29,50 @@
 }
 
 .post-item {
-  padding: 10px 0;
-  border-bottom: 1px solid #ddd;
+  background: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
 
-.add-community-btn {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  width: 60px;
-  height: 60px;
+.post-author {
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.post-content {
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.reply-box {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.reply-box textarea {
+  resize: none;
+  min-height: 90px;
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.reply-box button {
+  align-self: flex-end;
+  margin-top: 10px;
+  padding: 8px 16px;
   background: #3c009d;
   color: white;
-  font-size: 32px;
-  border-radius: 50%;
   border: none;
+  border-radius: 20px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-  transition: 0.2s;
 }
 
-.add-community-btn:hover {
+.reply-box button:hover {
   background: #2a006f;
 }

@@ -17,7 +17,7 @@ function App() {
         <Route path="/profilecreate" element={<ProfileCreationPage />} />
         <Route path="/profilepage" element={<ProfilePage/>} />
         <Route path="/forums" element={<ForumsPage/>} />
-        <Route path="/forums/:threadId" element={<ForumThreadPage />} />
+        <Route path="/forums/thread/:threadId" element={<ForumThreadPage />} />
       </Routes>
     </Router>
   );
