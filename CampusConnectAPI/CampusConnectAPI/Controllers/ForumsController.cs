@@ -101,10 +101,80 @@ namespace CampusConnectAPI.Controllers
             post.CreatedBy = user; // return author info
             return Ok(post);
         }
+
+        [HttpGet("community/{communityId}/threads")]
+        public async Task<ActionResult<IEnumerable<ForumThread>>> GetThreadsByCommunity(int communityId)
+        {
+            Console.WriteLine($"Fetching threads for communityId: {communityId}");
+            var community = await _context.Communities.FindAsync(communityId);
+            if (community == null)
+            {
+                Console.WriteLine("Community not found");
+                return NotFound("Community not found");
+            }
+
+            var threads = await _context.ForumThreads
+                .Include(t => t.CreatedBy)
+                .Where(t => t.CommunityId == communityId)
+                .ToListAsync();
+
+            Console.WriteLine($"Found {threads.Count} threads");
+            return Ok(threads);
+        }
+        [HttpPost("thread")]
+        public async Task<ActionResult<object>> CreateThread([FromBody] CreateThreadRequest request)
+        {
+            // 1️⃣ Validate community and user
+            var community = await _context.Communities.FindAsync(request.CommunityId);
+            var user = await _context.Profiles.FindAsync(request.CreatedById);
+
+            if (community == null) return NotFound("Community not found");
+            if (user == null) return NotFound("User not found");
+
+            // 2️⃣ Create new thread
+            var thread = new ForumThread
+            {
+                CommunityId = request.CommunityId,
+                CreatedById = request.CreatedById,
+                Title = request.Title.Trim(),
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.ForumThreads.Add(thread);
+            await _context.SaveChangesAsync();
+
+            // 3️⃣ Reload thread with CreatedBy populated
+            var fullThread = await _context.ForumThreads
+                .Include(t => t.CreatedBy)  // ensure EF Core loads CreatedBy
+                .Where(t => t.Id == thread.Id)
+                .Select(t => new
+                {
+                    t.Id,
+                    t.CommunityId,
+                    t.Title,
+                    t.CreatedAt,
+                    t.CreatedById,
+                    CreatedBy = new
+                    {
+                        t.CreatedBy.Id,
+                        t.CreatedBy.Username
+                    }
+                })
+                .FirstOrDefaultAsync();
+
+            return Ok(fullThread);
+        }
     }
 
-    // ===================== Request Models =====================
-    public class CreateCommunityRequest
+        // ===================== Request Models =====================
+
+        public class CreateThreadRequest
+    {
+        public int CommunityId { get; set; }
+        public int CreatedById { get; set; }
+        public string Title { get; set; } = null!;
+    }
+public class CreateCommunityRequest
     {
         public string Name { get; set; } = null!;
         public string EmailDomain { get; set; } = null!;

@@ -27,6 +27,32 @@
   },
   {
     "ContainingType": "CampusConnectAPI.Controllers.ForumsController",
+    "Method": "GetThreadsByCommunity",
+    "RelativePath": "api/Forums/community/{communityId}/threads",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "communityId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[CampusConnectAPI.Models.ForumThread, CampusConnectAPI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "CampusConnectAPI.Controllers.ForumsController",
     "Method": "GetCommunitiesWithThreads",
     "RelativePath": "api/Forums/community/by-email",
     "HttpMethod": "POST",
@@ -125,32 +151,6 @@
     "ReturnTypes": [
       {
         "Type": "CampusConnectAPI.Models.Post",
-        "MediaTypes": [
-          "text/plain",
-          "application/json",
-          "text/json"
-        ],
-        "StatusCode": 200
-      }
-    ]
-  },
-  {
-    "ContainingType": "CampusConnectAPI.Controllers.ForumsController",
-    "Method": "GetThreads",
-    "RelativePath": "api/Forums/threads/{communityId}",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "communityId",
-        "Type": "System.Int32",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": [
-      {
-        "Type": "System.Collections.Generic.IEnumerable\u00601[[CampusConnectAPI.Models.ForumThread, CampusConnectAPI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "text/plain",
           "application/json",

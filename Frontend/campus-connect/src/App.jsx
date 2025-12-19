@@ -5,6 +5,7 @@ import SignUp from "./pages/SignUp.jsx";
 import ProfileCreationPage from "./pages/ProfileCreationPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
 import ForumsPage from "./pages/ForumsPage.jsx";
+import CommunityThreadsPage from "./pages/CommunityThreadPage.jsx";
 import ForumThreadPage from "./pages/ForumThreadPage.jsx";
 
 function App() {
@@ -15,8 +16,9 @@ function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/profilecreate" element={<ProfileCreationPage />} />
-        <Route path="/profilepage" element={<ProfilePage/>} />
-        <Route path="/forums" element={<ForumsPage/>} />
+        <Route path="/profilepage" element={<ProfilePage />} />
+        <Route path="/forums" element={<ForumsPage />} />
+        <Route path="/forums/community/:communityId" element={<CommunityThreadsPage />} />
         <Route path="/forums/thread/:threadId" element={<ForumThreadPage />} />
       </Routes>
     </Router>

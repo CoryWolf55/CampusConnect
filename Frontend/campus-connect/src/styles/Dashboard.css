@@ -1,36 +1,33 @@
-/* =========================
-   Page wrapper
-========================= */
+/* Reset for full-width dashboard pages */
 .dashboard-page {
-  min-height: 100vh;
-  width: 100vw;
-  background: #1a1a1a; /* dark background */
-  color: #fff;
   display: flex;
   flex-direction: column;
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  min-height: 100vh;
+  width: 100vw;       /* full viewport width */
+  margin: 0;
+  background: #1a1a1a; /* dark background */
+  color: #fff;
+  padding: 0;
+  align-items: stretch; /* override body centering */
 }
 
-/* =========================
-   Banner (top header) — MATCHES PROFILE
-========================= */
+/* Banner */
 .banner {
   width: 100%;
   height: 80px;
-  background: #1d1d1d; /* unified dark header */
+  background: #1d1d1d;
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   padding: 0 40px;
+  box-sizing: border-box;
   box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-  position: relative;
-  z-index: 10;
 }
 
 .banner .logo {
   font-size: 28px;
   font-weight: 700;
-  color: #b478ff; /* violet highlight to match profile theme */
+  color: #b478ff; 
 }
 
 .profile-btn {
@@ -158,12 +155,17 @@
   padding: 20px;
   border-radius: 8px;
   width: 300px;
+  
 }
 
 .modal input {
-  width: 100%;
+  display: block;        /* makes margin auto work */           /* width of input */
+  margin: 10px auto;
+  width: 100%;     /* top/bottom 10px, horizontally centered */
   padding: 8px;
-  margin: 10px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  box-sizing: border-box; /* ensures padding doesn’t exceed width */
 }
 
 .modal-actions {
@@ -171,3 +173,19 @@
   justify-content: flex-end;
   gap: 10px;
 }
+
+.modal h2 {
+  text-align: center;  /* centers the text horizontally */
+  margin-bottom: 15px; /* optional: space below the title */
+}
+
+
+
+.forum-item h3 {
+  color:#646cff;
+}
+
+.forum-item p {
+  color:#646cff;
+}
+

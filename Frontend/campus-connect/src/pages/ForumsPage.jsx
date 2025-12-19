@@ -1,3 +1,4 @@
+// ForumsPage.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -6,47 +7,23 @@ import "../styles/Dashboard.css";
 
 function ForumsPage() {
   const navigate = useNavigate();
-
   const [communities, setCommunities] = useState([]);
   const [loadingCommunities, setLoadingCommunities] = useState(true);
 
-  // modal state
   const [showModal, setShowModal] = useState(false);
   const [communityName, setCommunityName] = useState("");
+  const currentUserId = parseInt(localStorage.getItem("userId"));
 
   const handleProfileClick = () => navigate("/profilepage");
   const handleNavClick = (path) => navigate(path);
-
-  useEffect(() => {
-    const email = localStorage.getItem("userEmail");
-    if (!email) return;
-
-    const fetchCommunities = async () => {
-      try {
-        const res = await axios.post(
-          `${API_BASE_URL}/forums/community/by-email`,
-          JSON.stringify(email),
-          { headers: { "Content-Type": "application/json" } }
-        );
-
-        console.log("Fetched communities with threads: ", res.data);
-        setCommunities(res.data);
-      } catch (err) {
-        console.error("Community fetch failed:", err.response?.data || err);
-      } finally {
-        setLoadingCommunities(false);
-      }
-    };
-
-    fetchCommunities();
-  }, []);
+  const handleCommunityClick = (communityId) => {
+    navigate(`/forums/community/${communityId}`);
+  };
 
   const handleCreateCommunity = async () => {
     if (!communityName.trim()) return;
-
     const email = localStorage.getItem("userEmail");
     if (!email) return;
-
     const emailDomain = email.split("@")[1];
 
     try {
@@ -54,7 +31,6 @@ function ForumsPage() {
         name: communityName.trim(),
         emailDomain,
       });
-
       setCommunities((prev) => [...prev, { ...res.data, ForumThreads: [] }]);
       setCommunityName("");
       setShowModal(false);
@@ -64,18 +40,66 @@ function ForumsPage() {
     }
   };
 
-  const handleThreadClick = (threadId) => {
-    console.log("Navigating to thread", threadId);
-    navigate(`/forums/thread/${threadId}`);
+  useEffect(() => {
+    const fetchCommunitiesWithThreads = async () => {
+      try {
+        const email = localStorage.getItem("userEmail");
+        if (!email) return;
+
+        const res = await axios.post(
+          `${API_BASE_URL}/forums/community/by-email`,
+          JSON.stringify(email),
+          { headers: { "Content-Type": "application/json" } }
+        );
+
+        const communitiesData = res.data || [];
+
+        const communitiesWithUsernames = await Promise.all(
+          communitiesData.map(async (c) => {
+            if (!c.ForumThreads || c.ForumThreads.length === 0) return c;
+
+            const threadsWithUsernames = await Promise.all(
+              c.ForumThreads.map(async (t) => {
+                if (!t.CreatedById) return { ...t, username: "Unknown" };
+                if (t.CreatedById === currentUserId) return { ...t, username: "You" };
+
+                try {
+                  const profileRes = await axios.get(
+                    `${API_BASE_URL}/users/profile/by-login/${t.CreatedById}`
+                  );
+                  return { ...t, username: profileRes.data.username || `User ${t.CreatedById}` };
+                } catch {
+                  return { ...t, username: `User ${t.CreatedById}` };
+                }
+              })
+            );
+
+            return { ...c, ForumThreads: threadsWithUsernames };
+          })
+        );
+
+        setCommunities(communitiesWithUsernames);
+      } catch (err) {
+        console.error("Community fetch failed:", err.response?.data || err);
+      } finally {
+        setLoadingCommunities(false);
+      }
+    };
+
+    fetchCommunitiesWithThreads();
+  }, [currentUserId]);
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    return date.toLocaleString();
   };
 
   return (
     <div className="dashboard-page">
       <header className="banner">
         <div className="logo">CampusConnect</div>
-        <button className="profile-btn" onClick={handleProfileClick}>
-          Profile
-        </button>
+        <button className="profile-btn" onClick={handleProfileClick}>Profile</button>
       </header>
 
       <nav className="navbar">
@@ -97,17 +121,20 @@ function ForumsPage() {
         ) : (
           <ul className="forum-list">
             {communities.map((c) => (
-              <li key={c.id} className="forum-item">
+              <li
+                key={c.id}
+                className="forum-item"
+                onClick={() => handleCommunityClick(c.id)}
+                style={{ cursor: "pointer" }}
+              >
                 <h3>{c.name}</h3>
                 <ul className="thread-list">
                   {(c.ForumThreads || []).map((t) => (
-                    <li
-                      key={t.Id}
-                      className="thread-item"
-                      onClick={() => handleThreadClick(t.Id)}
-                      style={{ cursor: "pointer" }}
-                    >
-                      {t.Title} — {t.CreatedBy?.FullName || "Unknown"}
+                    <li key={t.Id} className="thread-item">
+                      <h4 style={{ color: "#646cff" }}>{t.Title}</h4>
+                      <p>
+                        Posted by <strong>{t.username}</strong> • {formatDate(t.CreatedAt)}
+                      </p>
                     </li>
                   ))}
                 </ul>
@@ -116,9 +143,7 @@ function ForumsPage() {
           </ul>
         )}
 
-        <button className="add-community-btn" onClick={() => setShowModal(true)}>
-          +
-        </button>
+        <button className="add-community-btn" onClick={() => setShowModal(true)}>+</button>
       </div>
 
       {showModal && (

@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { API_BASE_URL } from "../config";
-import "../styles/Forums.css";
 
 function ForumThreadPage() {
   const { threadId } = useParams();
+  const currentUserId = parseInt(localStorage.getItem("userId"));
   const [thread, setThread] = useState(null);
   const [posts, setPosts] = useState([]);
   const [newPost, setNewPost] = useState("");
@@ -13,19 +13,37 @@ function ForumThreadPage() {
 
   useEffect(() => {
     const fetchThread = async () => {
+      if (!threadId) return;
       try {
         const res = await axios.get(`${API_BASE_URL}/forums/thread/${threadId}`);
-        setThread(res.data);
-        setPosts(res.data.posts || []);
+        const t = res.data;
+
+        // 1️⃣ Set thread username
+        const threadUsername =
+          t.createdById === currentUserId
+            ? "You"
+            : t.createdBy?.Username?.trim() || `User ${t.createdById}`;
+
+        setThread({ ...t, Username: threadUsername });
+
+        // 2️⃣ Set posts usernames
+        const postsWithUsernames = (t.posts || []).map((p) => ({
+          ...p,
+          Username:
+            p.createdById === currentUserId
+              ? "You"
+              : p.CreatedBy?.Username?.trim() || `User ${p.createdById}`
+        }));
+
+        setPosts(postsWithUsernames);
       } catch (err) {
         console.error("Failed to load thread:", err.response?.data || err);
       } finally {
         setLoading(false);
       }
     };
-
     fetchThread();
-  }, [threadId]);
+  }, [threadId, currentUserId]);
 
   const handleAddPost = async () => {
     if (!newPost.trim() || !thread) return;
@@ -33,14 +51,14 @@ function ForumThreadPage() {
     try {
       const res = await axios.post(`${API_BASE_URL}/forums/thread/${threadId}/posts`, {
         content: newPost.trim(),
-        createdById: 1 // TODO: replace with logged-in user's ID
+        CreatedById: currentUserId
       });
 
-      setPosts(prev => [...prev, res.data]);
+      // Add post with "You" username
+      setPosts((prev) => [...prev, { ...res.data, Username: "You" }]);
       setNewPost("");
     } catch (err) {
       console.error("Failed to add post:", err.response?.data || err);
-      alert("Failed to add post");
     }
   };
 
@@ -48,29 +66,24 @@ function ForumThreadPage() {
   if (!thread) return <div>Thread not found</div>;
 
   return (
-    <div className="dashboard-page">
-      <div className="forum-thread-container">
-        <h1>{thread.title}</h1>
-        <p>Posted by {thread.createdBy?.fullName || "Unknown"}</p>
+    <div>
+      <h1>{thread.Title}</h1>
+      <p>Posted by {thread.Username}</p>
 
-        <ul className="post-list">
-          {posts.map(post => (
-            <li key={post.id} className="post-item">
-              <div className="post-author">{post.createdBy?.fullName || "Unknown"}</div>
-              <div className="post-content">{post.content}</div>
-            </li>
-          ))}
-        </ul>
+      <ul>
+        {posts.map((post, index) => (
+          <li key={post.id ?? index}>
+            <strong>{post.Username}</strong>: {post.Content}
+          </li>
+        ))}
+      </ul>
 
-        <div className="reply-box">
-          <textarea
-            placeholder="Add a reply..."
-            value={newPost}
-            onChange={e => setNewPost(e.target.value)}
-          />
-          <button onClick={handleAddPost}>Reply</button>
-        </div>
-      </div>
+      <textarea
+        placeholder="Add a reply..."
+        value={newPost}
+        onChange={(e) => setNewPost(e.target.value)}
+      />
+      <button onClick={handleAddPost}>Reply</button>
     </div>
   );
 }
