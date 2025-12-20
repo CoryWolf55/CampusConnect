@@ -9,10 +9,8 @@ function ForumsPage() {
   const navigate = useNavigate();
   const [communities, setCommunities] = useState([]);
   const [loadingCommunities, setLoadingCommunities] = useState(true);
-
   const [showModal, setShowModal] = useState(false);
   const [communityName, setCommunityName] = useState("");
-  const currentUserId = parseInt(localStorage.getItem("userId"));
 
   const handleProfileClick = () => navigate("/profilepage");
   const handleNavClick = (path) => navigate(path);
@@ -22,8 +20,10 @@ function ForumsPage() {
 
   const handleCreateCommunity = async () => {
     if (!communityName.trim()) return;
+
     const email = localStorage.getItem("userEmail");
     if (!email) return;
+
     const emailDomain = email.split("@")[1];
 
     try {
@@ -31,7 +31,8 @@ function ForumsPage() {
         name: communityName.trim(),
         emailDomain,
       });
-      setCommunities((prev) => [...prev, { ...res.data, ForumThreads: [] }]);
+
+      setCommunities((prev) => [...prev, res.data]);
       setCommunityName("");
       setShowModal(false);
     } catch (err) {
@@ -41,7 +42,7 @@ function ForumsPage() {
   };
 
   useEffect(() => {
-    const fetchCommunitiesWithThreads = async () => {
+    const fetchCommunities = async () => {
       try {
         const email = localStorage.getItem("userEmail");
         if (!email) return;
@@ -52,33 +53,7 @@ function ForumsPage() {
           { headers: { "Content-Type": "application/json" } }
         );
 
-        const communitiesData = res.data || [];
-
-        const communitiesWithUsernames = await Promise.all(
-          communitiesData.map(async (c) => {
-            if (!c.ForumThreads || c.ForumThreads.length === 0) return c;
-
-            const threadsWithUsernames = await Promise.all(
-              c.ForumThreads.map(async (t) => {
-                if (!t.CreatedById) return { ...t, username: "Unknown" };
-                if (t.CreatedById === currentUserId) return { ...t, username: "You" };
-
-                try {
-                  const profileRes = await axios.get(
-                    `${API_BASE_URL}/users/profile/by-login/${t.CreatedById}`
-                  );
-                  return { ...t, username: profileRes.data.username || `User ${t.CreatedById}` };
-                } catch {
-                  return { ...t, username: `User ${t.CreatedById}` };
-                }
-              })
-            );
-
-            return { ...c, ForumThreads: threadsWithUsernames };
-          })
-        );
-
-        setCommunities(communitiesWithUsernames);
+        setCommunities(res.data || []);
       } catch (err) {
         console.error("Community fetch failed:", err.response?.data || err);
       } finally {
@@ -86,20 +61,16 @@ function ForumsPage() {
       }
     };
 
-    fetchCommunitiesWithThreads();
-  }, [currentUserId]);
-
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "";
-    const date = new Date(dateStr);
-    return date.toLocaleString();
-  };
+    fetchCommunities();
+  }, []);
 
   return (
     <div className="dashboard-page">
       <header className="banner">
         <div className="logo">CampusConnect</div>
-        <button className="profile-btn" onClick={handleProfileClick}>Profile</button>
+        <button className="profile-btn" onClick={handleProfileClick}>
+          Profile
+        </button>
       </header>
 
       <nav className="navbar">
@@ -128,22 +99,17 @@ function ForumsPage() {
                 style={{ cursor: "pointer" }}
               >
                 <h3>{c.name}</h3>
-                <ul className="thread-list">
-                  {(c.ForumThreads || []).map((t) => (
-                    <li key={t.Id} className="thread-item">
-                      <h4 style={{ color: "#646cff" }}>{t.Title}</h4>
-                      <p>
-                        Posted by <strong>{t.username}</strong> • {formatDate(t.CreatedAt)}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
               </li>
             ))}
           </ul>
         )}
 
-        <button className="add-community-btn" onClick={() => setShowModal(true)}>+</button>
+        <button
+          className="add-community-btn"
+          onClick={() => setShowModal(true)}
+        >
+          +
+        </button>
       </div>
 
       {showModal && (

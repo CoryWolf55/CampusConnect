@@ -65,21 +65,61 @@ namespace CampusConnectAPI.Controllers
 
         // ===================== Single Thread =====================
         [HttpGet("thread/{threadId}")]
-        public async Task<ActionResult<ForumThread>> GetThread(int threadId)
+        public async Task<ActionResult<object>> GetThread(int threadId)
         {
+            // Fetch the thread
             var thread = await _context.ForumThreads
-                .Include(t => t.CreatedBy)
-                .Include(t => t.Posts)
-                    .ThenInclude(p => p.CreatedBy)
                 .FirstOrDefaultAsync(t => t.Id == threadId);
 
             if (thread == null) return NotFound("Thread not found");
-            return Ok(thread);
+
+            // Fetch the thread creator
+            var threadCreator = await _context.Profiles
+                .Where(p => p.Id == thread.CreatedById)
+                .Select(p => new
+                {
+                    p.Id,
+                    Username = string.IsNullOrEmpty(p.Username) ? $"User {p.Id}" : p.Username
+                })
+                .FirstOrDefaultAsync();
+
+            // Fetch all posts in this thread with usernames
+            var posts = await _context.Posts
+                .Where(p => p.ThreadId == threadId)
+                .Select(p => new
+                {
+                    p.Id,
+                    p.Content,
+                    p.CreatedAt,
+                    p.CreatedById,
+                    CreatedBy = _context.Profiles
+                        .Where(u => u.Id == p.CreatedById)
+                        .Select(u => new
+                        {
+                            u.Id,
+                            Username = string.IsNullOrEmpty(u.Username) ? $"User {u.Id}" : u.Username
+                        })
+                        .FirstOrDefault()
+                })
+                .ToListAsync();
+
+            var result = new
+            {
+                thread.Id,
+                thread.Title,
+                thread.CreatedAt,
+                thread.CreatedById,
+                CreatedBy = threadCreator,
+                Posts = posts
+            };
+
+            return Ok(result);
         }
+
 
         // ===================== Create Post =====================
         [HttpPost("thread/{threadId}/posts")]
-        public async Task<ActionResult<Post>> CreatePost(int threadId, [FromBody] CreatePostRequest request)
+        public async Task<ActionResult<object>> CreatePost(int threadId, [FromBody] CreatePostRequest request)
         {
             var thread = await _context.ForumThreads.FindAsync(threadId);
             var user = await _context.Profiles.FindAsync(request.CreatedById);
@@ -98,8 +138,21 @@ namespace CampusConnectAPI.Controllers
             _context.Posts.Add(post);
             await _context.SaveChangesAsync();
 
-            post.CreatedBy = user; // return author info
-            return Ok(post);
+            // Explicitly return the username
+            var result = new
+            {
+                Id = post.Id,
+                ThreadId = post.ThreadId,
+                CreatedById = post.CreatedById,
+                Content = post.Content,
+                CreatedAt = post.CreatedAt,
+                CreatedBy = new
+                {
+                    Username = user.Username
+                }
+            };
+
+            return Ok(result);
         }
 
         [HttpGet("community/{communityId}/threads")]

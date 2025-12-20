@@ -53,22 +53,14 @@ function CommunityThreadsPage() {
         const threadsData = threadsRes.data || [];
 
         // Attach usernames
-        const threadsWithUsernames = await Promise.all(
-  threadsData.map(async (t) => {
-    if (t.createdById === currentUserId) return { ...t, Username: "You" };
-
-    try {
-      const profileRes = await axios.get(
-        `${API_BASE_URL}/users/profile/by-login/${t.createdById}`
-      );
-      const Username = profileRes.data.username; // <-- lowercase here
-      return { ...t, Username };
-    } catch (err) {
-      console.error(`Failed to fetch profile for userId ${t.createdById}:`, err);
-      return { ...t, Username: `User ${t.createdById}` };
-    }
-  })
-);
+        const threadsWithUsernames = threadsData.map(t => ({
+  ...t,
+  Username:
+    t.createdBy?.id === t.createdById &&
+    t.createdBy?.id === Number(localStorage.getItem("profileId"))
+      ? "You"
+      : t.createdBy?.username ?? "Unknown"
+}));
 
         setThreads(threadsWithUsernames);
 
@@ -134,9 +126,9 @@ function CommunityThreadsPage() {
                 className="forum-item"
                 onClick={() => handleThreadClick(t.id)}
               >
-                <h3>{t.Title}</h3>
+                <h3>{t.title}</h3>
                 <p>
-                  Posted by <strong>{t.Username}</strong> • {formatDate(t.CreatedAt)}
+                  Posted by <strong>{t.Username}</strong> • {formatDate(t.createdAt)}
                 </p>
               </li>
             ))}
