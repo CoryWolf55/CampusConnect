@@ -92,13 +92,25 @@ Edit Profile: Update your information anytime.
 ## Screenshots / Demo
 
 ### 🔹 Login Page
-![Login Page](./screenshots/SignUpPage.png)
+![Login](./screenshots/LoginPage.png)
+
+### 🔹 Sign Up Page
+![Sign Up](./screenshots/SignUpPage.png)
 
 ### 🔹 Profile Page
 ![Profile](./screenshots/ProfilePage.png)
 
-### 🔹 Forums
+### 🔹 Create Profile Page
+![Create Profile](./screenshots/EditProfilePage.png)
+
+### 🔹 Forums Page
 ![Forums](./screenshots/ForumsPage.png)
+
+### 🔹 Community Page
+![Community](./screenshots/CommunityPage.png)
+
+### 🔹 Threads Page
+![Threads](./screenshots/ThreadsPage.png)
 
 ## **Project Structure**
 CampusConnect/
