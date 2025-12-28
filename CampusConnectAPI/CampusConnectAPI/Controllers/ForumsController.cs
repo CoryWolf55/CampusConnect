@@ -16,40 +16,50 @@ namespace CampusConnectAPI.Controllers
             _context = context;
         }
 
-        // ===================== Communities by Email (with threads) =====================
+        // ===================== Communities by Email =====================
         [HttpPost("community/by-email")]
-        public async Task<ActionResult<IEnumerable<Community>>> GetCommunitiesWithThreads([FromBody] string email)
+        public async Task<IActionResult> GetCommunitiesWithThreads([FromBody] EmailRequest request)
         {
-            if (string.IsNullOrWhiteSpace(email))
+            if (string.IsNullOrWhiteSpace(request.Email))
                 return BadRequest("Email required");
 
-            var domain = email.Split('@').Last();
+            if (!request.Email.Contains("@"))
+                return BadRequest("Invalid email");
+
+            var domain = request.Email.Split('@').Last().Trim().ToLower();
 
             var campus = await _context.Campuses
                 .Include(c => c.Communities)
-                    .ThenInclude(comm => comm.ForumThreads)
-                        .ThenInclude(t => t.CreatedBy)
-                .Include(c => c.Communities)
-                    .ThenInclude(comm => comm.ForumThreads)
-                        .ThenInclude(t => t.Posts)
-                            .ThenInclude(p => p.CreatedBy)
-                .FirstOrDefaultAsync(c => c.EmailDomain == domain);
+                .FirstOrDefaultAsync(c =>
+                    c.EmailDomain.ToLower().Trim() == domain
+                );
 
             if (campus == null)
                 return NotFound("Campus not found");
 
-            return Ok(campus.Communities);
+            return Ok(campus.Communities.Select(c => new
+            {
+                c.Id,
+                c.Name
+            }));
         }
 
         // ===================== Create Community =====================
         [HttpPost("community")]
-        public async Task<ActionResult<Community>> CreateCommunity([FromBody] CreateCommunityRequest request)
+        public async Task<IActionResult> CreateCommunity([FromBody] CreateCommunityRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Name))
                 return BadRequest("Name required");
 
-            var campus = await _context.Campuses.FirstOrDefaultAsync(c => c.EmailDomain == request.EmailDomain);
-            if (campus == null) return NotFound("Campus not found");
+            var campus = await _context.Campuses
+                .Include(c => c.Communities)
+                .FirstOrDefaultAsync(c =>
+                    c.EmailDomain.ToLower().Trim() ==
+                    request.EmailDomain.ToLower().Trim()
+                );
+
+            if (campus == null)
+                return NotFound("Campus not found");
 
             var community = new Community
             {
@@ -57,33 +67,39 @@ namespace CampusConnectAPI.Controllers
                 CampusId = campus.Id
             };
 
-            _context.Communities.Add(community);
+            // ✅ IMPORTANT FIX
+            campus.Communities.Add(community);
+
             await _context.SaveChangesAsync();
 
-            return Ok(community);
+            // ✅ Return same shape as fetch endpoint
+            return Ok(new
+            {
+                community.Id,
+                community.Name
+            });
         }
 
         // ===================== Single Thread =====================
         [HttpGet("thread/{threadId}")]
         public async Task<ActionResult<object>> GetThread(int threadId)
         {
-            // Fetch the thread
             var thread = await _context.ForumThreads
                 .FirstOrDefaultAsync(t => t.Id == threadId);
 
             if (thread == null) return NotFound("Thread not found");
 
-            // Fetch the thread creator
+            // Normalize thread creator
             var threadCreator = await _context.Profiles
                 .Where(p => p.Id == thread.CreatedById)
                 .Select(p => new
                 {
-                    p.Id,
-                    Username = string.IsNullOrEmpty(p.Username) ? $"User {p.Id}" : p.Username
+                    Id = p.Id,
+                    Username = string.IsNullOrWhiteSpace(p.Username) ? $"User {p.Id}" : p.Username
                 })
                 .FirstOrDefaultAsync();
 
-            // Fetch all posts in this thread with usernames
+            // Normalize posts
             var posts = await _context.Posts
                 .Where(p => p.ThreadId == threadId)
                 .Select(p => new
@@ -96,14 +112,14 @@ namespace CampusConnectAPI.Controllers
                         .Where(u => u.Id == p.CreatedById)
                         .Select(u => new
                         {
-                            u.Id,
-                            Username = string.IsNullOrEmpty(u.Username) ? $"User {u.Id}" : u.Username
+                            Id = u.Id,
+                            Username = string.IsNullOrWhiteSpace(u.Username) ? $"User {u.Id}" : u.Username
                         })
                         .FirstOrDefault()
                 })
                 .ToListAsync();
 
-            var result = new
+            return Ok(new
             {
                 thread.Id,
                 thread.Title,
@@ -111,18 +127,16 @@ namespace CampusConnectAPI.Controllers
                 thread.CreatedById,
                 CreatedBy = threadCreator,
                 Posts = posts
-            };
-
-            return Ok(result);
+            });
         }
-
 
         // ===================== Create Post =====================
         [HttpPost("thread/{threadId}/posts")]
         public async Task<ActionResult<object>> CreatePost(int threadId, [FromBody] CreatePostRequest request)
         {
             var thread = await _context.ForumThreads.FindAsync(threadId);
-            var user = await _context.Profiles.FindAsync(request.CreatedById);
+            var user = await _context.Profiles
+                .FirstOrDefaultAsync(p => p.LoginId == request.CreatedById);
 
             if (thread == null) return NotFound("Thread not found");
             if (user == null) return NotFound("User not found");
@@ -130,7 +144,7 @@ namespace CampusConnectAPI.Controllers
             var post = new Post
             {
                 ThreadId = threadId,
-                CreatedById = request.CreatedById,
+                CreatedById = user.Id,
                 Content = request.Content,
                 CreatedAt = DateTime.UtcNow
             };
@@ -138,57 +152,42 @@ namespace CampusConnectAPI.Controllers
             _context.Posts.Add(post);
             await _context.SaveChangesAsync();
 
-            // Explicitly return the username
-            var result = new
+            return Ok(new
             {
-                Id = post.Id,
-                ThreadId = post.ThreadId,
-                CreatedById = post.CreatedById,
-                Content = post.Content,
-                CreatedAt = post.CreatedAt,
-                CreatedBy = new
-                {
-                    Username = user.Username
-                }
-            };
-
-            return Ok(result);
+                post.Id,
+                post.ThreadId,
+                post.CreatedById,
+                post.Content,
+                post.CreatedAt,
+                CreatedBy = new { user.Username }
+            });
         }
 
         [HttpGet("community/{communityId}/threads")]
         public async Task<ActionResult<IEnumerable<ForumThread>>> GetThreadsByCommunity(int communityId)
         {
-            Console.WriteLine($"Fetching threads for communityId: {communityId}");
-            var community = await _context.Communities.FindAsync(communityId);
-            if (community == null)
-            {
-                Console.WriteLine("Community not found");
-                return NotFound("Community not found");
-            }
-
             var threads = await _context.ForumThreads
                 .Include(t => t.CreatedBy)
                 .Where(t => t.CommunityId == communityId)
                 .ToListAsync();
 
-            Console.WriteLine($"Found {threads.Count} threads");
             return Ok(threads);
         }
+
         [HttpPost("thread")]
         public async Task<ActionResult<object>> CreateThread([FromBody] CreateThreadRequest request)
         {
-            // 1️⃣ Validate community and user
             var community = await _context.Communities.FindAsync(request.CommunityId);
-            var user = await _context.Profiles.FindAsync(request.CreatedById);
+            var user = await _context.Profiles
+                .FirstOrDefaultAsync(p => p.LoginId == request.CreatedById);
 
             if (community == null) return NotFound("Community not found");
             if (user == null) return NotFound("User not found");
 
-            // 2️⃣ Create new thread
             var thread = new ForumThread
             {
                 CommunityId = request.CommunityId,
-                CreatedById = request.CreatedById,
+                CreatedById = user.Id,
                 Title = request.Title.Trim(),
                 CreatedAt = DateTime.UtcNow
             };
@@ -196,38 +195,27 @@ namespace CampusConnectAPI.Controllers
             _context.ForumThreads.Add(thread);
             await _context.SaveChangesAsync();
 
-            // 3️⃣ Reload thread with CreatedBy populated
-            var fullThread = await _context.ForumThreads
-                .Include(t => t.CreatedBy)  // ensure EF Core loads CreatedBy
-                .Where(t => t.Id == thread.Id)
-                .Select(t => new
-                {
-                    t.Id,
-                    t.CommunityId,
-                    t.Title,
-                    t.CreatedAt,
-                    t.CreatedById,
-                    CreatedBy = new
-                    {
-                        t.CreatedBy.Id,
-                        t.CreatedBy.Username
-                    }
-                })
-                .FirstOrDefaultAsync();
-
-            return Ok(fullThread);
+            return Ok(new
+            {
+                thread.Id,
+                thread.CommunityId,
+                thread.Title,
+                thread.CreatedAt,
+                thread.CreatedById,
+                CreatedBy = new { user.Id, user.Username }
+            });
         }
     }
 
-        // ===================== Request Models =====================
-
-        public class CreateThreadRequest
+    // ===================== Request Models =====================
+    public class CreateThreadRequest
     {
         public int CommunityId { get; set; }
         public int CreatedById { get; set; }
         public string Title { get; set; } = null!;
     }
-public class CreateCommunityRequest
+
+    public class CreateCommunityRequest
     {
         public string Name { get; set; } = null!;
         public string EmailDomain { get; set; } = null!;
@@ -237,5 +225,10 @@ public class CreateCommunityRequest
     {
         public int CreatedById { get; set; }
         public string Content { get; set; } = null!;
+    }
+
+    public class EmailRequest
+    {
+        public string Email { get; set; } = null!;
     }
 }

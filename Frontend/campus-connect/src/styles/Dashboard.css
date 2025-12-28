@@ -1,17 +1,33 @@
-/* Reset for full-width dashboard pages */
+/* =========================
+   Reset for full-width dashboard pages
+========================= */
+
+body.dashboard {
+  display: block; /* allow flex layouts in dashboard-page to work */
+  justify-content: normal;
+  align-items: normal;
+  min-height: 100vh;
+  width: 100vw;
+  background: #1a1a1a;
+}
+
 .dashboard-page {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  width: 100vw;       /* full viewport width */
+  width: 100vw; /* full viewport width */
   margin: 0;
-  background: #1a1a1a; /* dark background */
-  color: #fff;
   padding: 0;
-  align-items: stretch; /* override body centering */
+  background: #1a1a1a;
+  color: #fff;
+  align-items: stretch;
+  opacity: 0;
+  animation: pageFadeIn 0.6s ease forwards;
 }
 
-/* Banner */
+/* =========================
+   Banner
+========================= */
 .banner {
   width: 100%;
   height: 80px;
@@ -22,12 +38,16 @@
   padding: 0 40px;
   box-sizing: border-box;
   box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  opacity: 0;
+  transform: translateY(-10px);
+  animation: headerSlideDown 0.5s ease forwards;
 }
 
 .banner .logo {
   font-size: 28px;
   font-weight: 700;
-  color: #b478ff; 
+  color: #b478ff;
+  animation: logoPulse 1.5s ease-in-out infinite alternate;
 }
 
 .profile-btn {
@@ -39,13 +59,14 @@
   font-size: 16px;
   cursor: pointer;
   transition: 0.2s;
-  width: 200px; /* same width as profile */
+  width: 200px;
 }
 
 .profile-btn:hover {
   background: #2a006f;
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 0 10px #646cff50;
 }
-
 
 /* =========================
    Navbar below banner
@@ -55,6 +76,9 @@
   justify-content: center;
   background-color: #1a1a1a;
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  opacity: 0;
+  transform: translateY(-10px);
+  animation: headerSlideDown 0.5s ease forwards 0.1s;
 }
 
 .navbar ul {
@@ -69,11 +93,13 @@
   cursor: pointer;
   font-weight: 500;
   color: #ccc;
-  transition: color 0.2s;
+  transition: color 0.2s, transform 0.2s;
+  position: relative;
 }
 
 .navbar li:hover {
   color: #646cff;
+  transform: scale(1.05);
 }
 
 /* =========================
@@ -82,20 +108,27 @@
 .dashboard-container {
   flex: 1;
   padding: 40px;
+  animation: fadeInUp 0.6s ease forwards;
+  position: relative;
 }
 
 .dashboard-container h1 {
   font-size: 32px;
   margin-bottom: 20px;
-  color: #646cff; /* accent color */
+  color: #646cff;
+  animation: fadeInDown 0.6s ease forwards;
 }
 
 .dashboard-container p {
   font-size: 18px;
   line-height: 1.5;
   color: #cccccc;
+  animation: fadeIn 0.6s ease forwards;
 }
 
+/* =========================
+   Forum List & Items
+========================= */
 .forum-list {
   list-style: none;
   padding: 0;
@@ -109,20 +142,37 @@
   border-radius: 10px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   cursor: pointer;
-  transition: transform 0.2s, background 0.2s;
+  transition: transform 0.3s, background 0.3s, box-shadow 0.3s;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+.forum-item h3,
+.forum-item p {
+  color: #646cff;
 }
 
 .forum-item:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px) rotateZ(-1deg);
   background: #e0e0e0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
+/* Staggered animation for forum items */
+.forum-item:nth-child(1) { animation-delay: 0.1s; }
+.forum-item:nth-child(2) { animation-delay: 0.2s; }
+.forum-item:nth-child(3) { animation-delay: 0.3s; }
+.forum-item:nth-child(4) { animation-delay: 0.4s; }
+.forum-item:nth-child(5) { animation-delay: 0.5s; }
 
-
+/* =========================
+   Floating Add Community Button
+========================= */
 .add-community-btn {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
+  position: fixed;       /* fixed so it stays on screen while scrolling */
+  bottom: 30px;          /* distance from bottom of viewport */
+  right: 30px;           /* distance from right of viewport */
   width: 60px;
   height: 60px;
   border-radius: 50%;
@@ -132,74 +182,119 @@
   font-size: 32px;
   cursor: pointer;
   box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-  transition: 0.2s;
+  animation: pulse 2s infinite;
+  transition: 0.3s;
+  z-index: 1000;         /* make sure it's above everything */
 }
 
 .add-community-btn:hover {
   background-color: #2a006f;
-  transform: scale(1.05);
+  transform: scale(1.1) rotateZ(-3deg);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.6);
 }
 
-
+/* =========================
+   Modal
+========================= */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: fadeIn 0.3s ease forwards;
+  z-index: 2000; /* above floating button */
 }
 
 .modal {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  width: 300px;
-  
+  background: #1d1d1d; /* match dashboard dark theme */
+  color: #fff;
+  padding: 25px 30px;
+  border-radius: 12px;
+  width: 320px;
+  max-width: 90%;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  transform: scale(0.8);
+  animation: scaleIn 0.3s ease forwards;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.modal h2 {
+  margin: 0;
+  text-align: center;
+  font-size: 22px;
+  color: #b478ff;
 }
 
 .modal input {
-  display: block;        /* makes margin auto work */           /* width of input */
-  margin: 10px auto;
-  width: 100%;     /* top/bottom 10px, horizontally centered */
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  box-sizing: border-box; /* ensures padding doesn’t exceed width */
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #3c009d;
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border 0.3s, box-shadow 0.3s;
+}
+
+.modal input:focus {
+  outline: none;
+  border: 2px solid #646cff;
+  box-shadow: 0 0 10px rgba(100, 108, 255, 0.5);
 }
 
 .modal-actions {
   display: flex;
-  justify-content: flex-end;
-  gap: 10px;
+  justify-content: flex-end; /* align buttons to the right */
+  gap: 10px; /* even spacing between buttons */
+  margin-top: 10px;
 }
 
-.modal h2 {
-  text-align: center;  /* centers the text horizontally */
-  margin-bottom: 15px; /* optional: space below the title */
+.modal-actions button {
+  flex: 1; /* make buttons equal width */
+  padding: 10px 0;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.3s;
 }
 
-
-
-.forum-item h3 {
-  color:#646cff;
+.modal-actions button:first-child {
+  background: #3c009d; /* cancel button style */
 }
 
-.forum-item p {
-  color:#646cff;
+.modal-actions button:first-child:hover {
+  background: #2a006f;
 }
 
+.modal-actions button:last-child {
+  background: #646cff; /* create button style */
+  color: white;
+}
 
+.modal-actions button:last-child:hover {
+  background: #4c53e0;
+}
+/* =========================
+   Thread / Posts
+========================= */
 .thread-header h1 {
   color: #646cff;
   font-size: 28px;
   margin-bottom: 8px;
+  animation: fadeInDown 0.6s ease forwards;
 }
 
 .thread-meta {
   color: #ccc;
   margin-bottom: 20px;
   font-size: 14px;
+  animation: fadeIn 0.6s ease forwards;
 }
 
 .posts-list {
@@ -213,6 +308,9 @@
   padding: 15px 20px;
   border-radius: 10px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.5s ease forwards;
 }
 
 .post-meta {
@@ -227,11 +325,21 @@
   white-space: pre-wrap;
 }
 
+/* Stagger posts animation */
+.post-card:nth-child(1) { animation-delay: 0.1s; }
+.post-card:nth-child(2) { animation-delay: 0.2s; }
+.post-card:nth-child(3) { animation-delay: 0.3s; }
+.post-card:nth-child(4) { animation-delay: 0.4s; }
+
+/* =========================
+   Reply Box
+========================= */
 .reply-box {
   margin-top: 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  animation: fadeIn 0.6s ease forwards;
 }
 
 .reply-box textarea {
@@ -239,18 +347,18 @@
   min-height: 80px;
   padding: 10px;
   border-radius: 8px;
-  border: 1px solid #3c009d; /* base border color */
+  border: 1px solid #3c009d;
   resize: vertical;
   background: #1a1a1a;
   color: #fff;
   font-size: 14px;
-  transition: 0.2s;
+  transition: 0.3s;
 }
 
 .reply-box textarea:focus {
   outline: none;
-  border: 2px solid #646cff; /* highlight color on focus */
-  box-shadow: 0 0 10px rgba(100, 108, 255, 0.5);
+  border: 2px solid #646cff;
+  box-shadow: 0 0 10px rgba(100, 108, 255,0.5);
 }
 
 .reply-box button {
@@ -262,7 +370,7 @@
   padding: 8px 16px;
   font-size: 14px;
   cursor: pointer;
-  transition: 0.2s;
+  transition: 0.3s;
   width: 100%;
 }
 
@@ -270,6 +378,50 @@
   background: #2a006f;
 }
 
+/* =========================
+   Animations
+========================= */
+@keyframes pageFadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
 
+@keyframes headerSlideDown {
+  0% { opacity: 0; transform: translateY(-10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
 
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
 
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+  0% { opacity: 0; transform: translateY(-20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+  0% { opacity: 0; transform: translateX(-20px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scaleIn {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes logoPulse {
+  0% { color: #b478ff; text-shadow: 0 0 5px #b478ff; }
+  100% { color: #9461e0; text-shadow: 0 0 15px #646cff; }
+}

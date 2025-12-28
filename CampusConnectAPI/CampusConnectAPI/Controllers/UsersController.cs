@@ -184,7 +184,10 @@ namespace CampusConnectAPI.Controllers
             else
             {
                 // UPDATE
-                profile.Username = request.Username;
+                if (!string.IsNullOrWhiteSpace(request.Username))
+                {
+                    profile.Username = request.Username.Trim();
+                }
                 profile.Major = request.Major;
                 profile.Year = request.Year;
                 profile.Description = request.Description;

@@ -1,4 +1,3 @@
-// ForumsPage.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -29,7 +28,7 @@ function ForumsPage() {
     try {
       const res = await axios.post(`${API_BASE_URL}/forums/community`, {
         name: communityName.trim(),
-        emailDomain,
+        emailDomain: emailDomain.trim(),
       });
 
       setCommunities((prev) => [...prev, res.data]);
@@ -42,6 +41,11 @@ function ForumsPage() {
   };
 
   useEffect(() => {
+    document.body.classList.add("dashboard");
+    return () => document.body.classList.remove("dashboard");
+  }, []);
+
+  useEffect(() => {
     const fetchCommunities = async () => {
       try {
         const email = localStorage.getItem("userEmail");
@@ -49,8 +53,7 @@ function ForumsPage() {
 
         const res = await axios.post(
           `${API_BASE_URL}/forums/community/by-email`,
-          JSON.stringify(email),
-          { headers: { "Content-Type": "application/json" } }
+          { email }
         );
 
         setCommunities(res.data || []);
@@ -65,71 +68,76 @@ function ForumsPage() {
   }, []);
 
   return (
-    <div className="dashboard-page">
-      <header className="banner">
-        <div className="logo">CampusConnect</div>
-        <button className="profile-btn" onClick={handleProfileClick}>
-          Profile
-        </button>
-      </header>
+    <div className="dashboard-page forums-page">
+  {/* Banner */}
+  <header className="banner">
+    <div className="logo">CampusConnect</div>
+    <button className="profile-btn" onClick={handleProfileClick}>
+      Profile
+    </button>
+  </header>
 
-      <nav className="navbar">
-        <ul>
-          <li onClick={() => handleNavClick("/dashboard")}>Dashboard</li>
-          <li onClick={() => handleNavClick("/forums")}>Forums</li>
-          <li onClick={() => handleNavClick("/notifications")}>Notifications</li>
-          <li onClick={() => handleNavClick("/settings")}>Settings</li>
-        </ul>
-      </nav>
+  {/* Navbar */}
+  <nav className="navbar">
+    <ul>
+      <li onClick={() => handleNavClick("/dashboard")}>Dashboard</li>
+      <li onClick={() => handleNavClick("/forums")}>Forums</li>
+      <li onClick={() => handleNavClick("/notifications")}>Notifications</li>
+      <li onClick={() => handleNavClick("/settings")}>Settings</li>
+    </ul>
+  </nav>
 
-      <div className="dashboard-container">
-        <h1>Forums</h1>
+  {/* Main Content */}
+  <div className="dashboard-container">
+    <h1>Forums</h1>
 
-        {loadingCommunities ? (
-          <p>Loading...</p>
-        ) : communities.length === 0 ? (
-          <p>No communities found.</p>
-        ) : (
-          <ul className="forum-list">
-            {communities.map((c) => (
-              <li
-                key={c.id}
-                className="forum-item"
-                onClick={() => handleCommunityClick(c.id)}
-                style={{ cursor: "pointer" }}
-              >
-                <h3>{c.name}</h3>
-              </li>
-            ))}
-          </ul>
-        )}
+    {loadingCommunities ? (
+      <p>Loading...</p>
+    ) : communities.length === 0 ? (
+      <p>No communities found.</p>
+    ) : (
+      <ul className="forum-list">
+        {communities.map((c, index) => (
+          <li
+            key={c.id}
+            className="forum-item"
+            onClick={() => handleCommunityClick(c.id)}
+            style={{ animationDelay: `${index * 0.05}s` }}
+          >
+            <h3>{c.name}</h3>
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
 
-        <button
-          className="add-community-btn"
-          onClick={() => setShowModal(true)}
-        >
-          +
-        </button>
-      </div>
+  {/* Floating Add Community Button - now outside container */}
+  <button
+    className="add-community-btn"
+    onClick={() => setShowModal(true)}
+  >
+    +
+  </button>
 
-      {showModal && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h2>Create Community</h2>
-            <input
-              type="text"
-              value={communityName}
-              onChange={(e) => setCommunityName(e.target.value)}
-              placeholder="Community name"
-            />
-            <div className="modal-actions">
-              <button onClick={() => setShowModal(false)}>Cancel</button>
-              <button onClick={handleCreateCommunity}>Create</button>
-            </div>
-          </div>
+  {/* Modal */}
+  {showModal && (
+    <div className="modal-overlay">
+      <div className="modal">
+        <h2>Create Community</h2>
+        <input
+          type="text"
+          value={communityName}
+          onChange={(e) => setCommunityName(e.target.value)}
+          placeholder="Community name"
+        />
+        <div className="modal-actions">
+          <button onClick={() => setShowModal(false)}>Cancel</button>
+          <button onClick={handleCreateCommunity}>Create</button>
         </div>
-      )}
+      </div>
     </div>
+  )}
+</div>
   );
 }
 

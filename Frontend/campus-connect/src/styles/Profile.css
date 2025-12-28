@@ -1,4 +1,6 @@
-/* Full-page wrapper */
+/* =========================
+   Profile Page Wrapper
+========================= */
 .profile-page-wrapper {
   width: 100vw;
   min-height: 100vh;
@@ -6,12 +8,13 @@
   color: #ddd;
   display: flex;
   flex-direction: column;
+  opacity: 0;             /* start hidden for fade-in */
+  animation: pageFadeIn 0.6s ease forwards;
 }
 
-
-/* --------------------- */
-/* Header Banner */
-/* --------------------- */
+/* =========================
+   Header Banner
+========================= */
 .profile-header {
   width: 100%;
   height: 80px;
@@ -21,12 +24,16 @@
   justify-content: space-between;
   padding: 0 40px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  opacity: 0;
+  transform: translateY(-10px);
+  animation: headerSlideDown 0.5s ease forwards 0.1s;
 }
 
 .logo {
   font-size: 28px;
-  color: #b478ff; /* violet tint */
+  color: #b478ff;
   font-weight: 700;
+  animation: logoPulse 1.5s ease-in-out infinite alternate;
 }
 
 .profile-header-btn {
@@ -39,27 +46,34 @@
   cursor: pointer;
   transition: 0.2s;
   width: 200px;
+  transform: translateY(0);
 }
 
 .profile-header-btn:hover {
   background: #2a006f;
+  transform: translateY(-2px) scale(1.03);
 }
 
-
-/* --------------------- */
-/* Content Layout */
-/* --------------------- */
+/* =========================
+   Content Layout
+========================= */
 .profile-content {
   display: flex;
   gap: 60px;
   padding: 40px 60px;
   flex: 1;
+  opacity: 0;
+  transform: translateY(15px);
+  animation: contentFadeUp 0.6s ease forwards 0.2s;
 }
 
 /* Left profile sidebar */
 .profile-left {
   width: 280px;
   text-align: center;
+  opacity: 0;
+  transform: translateX(-20px);
+  animation: slideInLeft 0.5s ease forwards 0.3s;
 }
 
 .profile-avatar {
@@ -68,6 +82,12 @@
   border-radius: 50%;
   border: 3px solid #3c009d;
   margin-bottom: 20px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.profile-avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px #646cff;
 }
 
 .profile-username {
@@ -82,8 +102,8 @@
   font-size: 16px;
   color: #b0b0b0;
   margin: 4px 0;
+  transition: color 0.3s ease;
 }
-
 
 /* Right column */
 .profile-right {
@@ -92,26 +112,39 @@
   padding: 30px;
   border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  opacity: 0;
+  transform: translateX(20px);
+  animation: slideInRight 0.5s ease forwards 0.4s;
 }
 
 .profile-right h3 {
   color: #b478ff;
   margin-top: 20px;
   margin-bottom: 8px;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeUp 0.4s ease forwards 0.5s;
 }
 
 .profile-description {
   color: #ccc;
   line-height: 1.5;
   margin-bottom: 15px;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeUp 0.4s ease forwards 0.55s;
 }
 
-
-
+/* =========================
+   Navbar
+========================= */
 .navbar {
   width: 100%;
   background: #111;
   padding: 12px 0;
+  opacity: 0;
+  transform: translateY(-10px);
+  animation: headerSlideDown 0.5s ease forwards 0.1s;
 }
 
 .navbar ul {
@@ -125,9 +158,48 @@
   cursor: pointer;
   color: #ccc;
   font-size: 18px;
-  transition: 0.2s;
+  transition: 0.2s, transform 0.2s;
 }
 
 .navbar li:hover {
   color: white;
+  transform: translateY(-2px);
+}
+
+/* =========================
+   Keyframes
+========================= */
+@keyframes pageFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes headerSlideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes contentFadeUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes logoPulse {
+  0% { color: #b478ff; text-shadow: 0 0 5px #b478ff; }
+  100% { color: #9461e0; text-shadow: 0 0 15px #646cff; }
 }

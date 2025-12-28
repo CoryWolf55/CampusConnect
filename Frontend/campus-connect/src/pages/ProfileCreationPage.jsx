@@ -111,7 +111,7 @@ function ProfileCreationPage() {
     <div className="page">
       <div className="container">
         <div className="header">
-          <h2>{profile ? "Edit Profile" : "Create Profile"}</h2>
+          <h2 className ="text">{profile ? "Edit Profile" : "Create Profile"}</h2>
           <div className="underline"></div>
         </div>
 

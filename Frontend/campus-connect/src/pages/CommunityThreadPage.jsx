@@ -34,7 +34,6 @@ function CommunityThreadsPage() {
 
       const res = await axios.post(`${API_BASE_URL}/forums/thread`, payload);
       const newThread = res.data;
-      newThread.Username = "You"; // current user
       setThreads((prev) => [newThread, ...prev]);
       setThreadTitle("");
       setShowModal(false);
@@ -43,6 +42,11 @@ function CommunityThreadsPage() {
     }
   };
 
+
+  useEffect(() => {
+    document.body.classList.add("dashboard");
+    return () => document.body.classList.remove("dashboard");
+  }, []);
   useEffect(() => {
     const fetchThreads = async () => {
       try {
@@ -69,7 +73,7 @@ function CommunityThreadsPage() {
         if (email) {
           const communitiesRes = await axios.post(
             `${API_BASE_URL}/forums/community/by-email`,
-            JSON.stringify(email),
+            { email },
             { headers: { "Content-Type": "application/json" } }
           );
           const community = communitiesRes.data.find(
